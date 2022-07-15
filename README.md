@@ -1,4 +1,4 @@
 # ptb.metw.cc
 
-Henüz beck-end bitmedi... Çok güzel bir proje olacak, wikipedia gibi bir şey planlıyorum: *özgür  ~~ansiklopedi~~ medya*
+Henüz beck-end bitmedi... Çok güzel bir proje olacak, wikipedia gibi bir şey planlıyorum: *özgür  ~~ansiklopedi~~ medya*.
 [Güncel versiyondan](www.metw.cc) epey farklı, güncel versiyon ptb ile mukayese edilemeyecek derekede, ikisi bambaşka müsteviye ait!
