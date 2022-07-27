@@ -1,0 +1,48 @@
+* { box-sizing: border-box; color: var(--color); font-family: "Source Code Pro", monospace; }
+
+.full-x, .full-size { width: 100%; }
+.full-y, .full-size { height: 100%; }
+
+.center-x, .center { left: 50%; transform: translateX(-50%); position: absolute }
+.center-y, .center { top: 50%; transform: translateY(-50%); position: absolute }
+.center { transform: translate(-50%, -50%); }
+
+.href { color: var(--link-color); text-decoration: underline; cursor: pointer }
+.icon svg, .icon img  { display: inline-flex; align-self: center; height: 1em; width: 1em; top: .2em; position: relative}
+body { background-color: var(--background-color-ground) }
+
+input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s }
+input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background-color-3rd) inset !important; -webkit-text-fill-color: var(--color); }
+
+#loader, #captcha { background-color: var(--background-color-top-ground); z-index: 10; display: none; top: 0; position: absolute; user-select: none }
+#captcha { z-index: 9; transition: 0.3s }
+#captcha > div { width: 360px }
+#captcha-input { width: fit-content }
+#captcha > div > button, #captcha > div > div > button, #captcha > div > input { font-size: 18px; background-color: var(--background-color-top-1st); margin-top: 8px; margin-left: 8px }
+#captcha-image { width: 320px; height: 160px; border-radius: 10px }
+#captcha > div > * { float: right }
+#captcha > div > div > button:hover, #captcha > div > button:hover { background-color: var(--background-color-top-2nd) }
+
+.app { background-color: var(--background-color-1st); max-width: 1600px}
+.app > main { height: calc(100% - 60px); background-color: var(--background-color-2nd); border: none; padding: 30px }
+
+.app > nav { height: 60px; background-color: inherit; padding: 10px; padding-left: 20px; padding-right: 20px; user-select: none; transition: 0.3s  }
+.app > nav > div:first-of-type { cursor: pointer; line-height: 40px; font-size: 28px; transition: 0.3s }
+.app > nav > div { display: inline-block }
+#title-buttons { float: right; font-size: 19px; margin-top: 8px; display: inline; text-align: center }
+#title-buttons > *, #title-buttons > ul > * {  padding: 10px; transition: 0.3s; cursor: pointer; border-radius: 10px; list-style-type: none; display: inline }
+#title-buttons > a:hover, #title-buttons > ul > li:hover { background-color: var(--background-color-4th) }
+
+@media (max-width:800px) {
+    .app > nav { height: 96px }
+    .app > nav > div { display: block; position: absolute; left: 50%; transform: translateX(-50%) }
+    .app > nav > div:last-of-type { position: fixed; top: 48px; width: 100%  }
+    .app > main { height: calc(100% - 96px) }
+    .desktop-screen { display: none }
+}
+
+@media (min-width:1500px) {
+    .app { height: calc(100% - 40px); width: calc(100% - 40px); border-radius: 10px }
+    .app > nav  { border-top-left-radius: 10px; border-top-right-radius: 10px }
+    .app > main { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px }
+}

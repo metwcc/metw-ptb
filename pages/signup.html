@@ -1,0 +1,25 @@
+﻿<form id="signup-form" class="center" action="javascript:signup(false)">
+    <input id="signup-form-username" placeholder="kullanıcı adı" oninput="customInput(event, 20, /[^\w-]/g)" />
+    <br /><input id="signup-form-password" type="password" placeholder="şifre" oninput="customInput(event, 128)" />
+    <br /><input id="signup-form-password-confirm" type="password" placeholder="şifreyi onayla" oninput="customInput(event, 128)" />
+    <br />
+    <br /><button class="center-x">Kaydol</button>
+</form>
+<style>
+    #signup-form, #signup-form > input { width: 250px }
+    #signup-form > * { margin: 3px; font-size: 18px}
+</style>
+<script>
+    function signup(validated) {
+        let password = by.id("signup-form-password").value, confirmPassword = by.id("signup-form-password-confirm").value, username = by.id("signup-form-username").value
+        if (username.length < 4) { alert.error("Kullanıcı adı 4 karakterden kısa olamaz"); return false }
+        if (password.length < 4) { alert.error("Şifre 4 karakterden kısa olamaz"); return false }
+        if (confirmPassword != password) { alert.error("Şifreler uyuşmuyor"); return false }
+        if (validated) {
+            fetchJSON(backEndUrl + 'signup', { method: 'post', body: { username: username, password: password, captchaKey: captchaKey } }, true).then(([json, ok]) => {
+                if (ok) { alert.success('Hesabınız oluşturuldu, giriş yapabilirsiniz'); redirect('/giriş') }
+                else alert.error(json)
+            })
+        } else captcha(() => signup(true))
+    }
+</script>
