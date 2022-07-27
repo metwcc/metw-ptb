@@ -126,4 +126,3 @@ window.onpopstate = loadPage
 logged(localStorage.getItem('logged') == 'true')
 loadPage(); loader(false)
 if ("serviceWorker" in navigator) { window.addEventListener("load", function () { navigator.serviceWorker.register("/serviceWorker.js") }) }
-window.onpopstate = function (event) { disableStateUpdates = true; loadUri() }
