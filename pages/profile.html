@@ -14,7 +14,8 @@
 <style>
     .profile { background-color: var(--background-color-1st); width: 100%; height: 126px; padding: 10px; border-radius: 10px }
     .profile > div { display: inline-block; height: 116px; min-width: 80px; position: absolute }
-    .profile > div:first-of-type > * { transition: 0.1s; background-color: var(--background-color-2nd); border-radius: 10px; height: 80px; width: 80px }
+    .profile > div:first-of-type > * { transition: 0.1s; border-radius: 5px; height: 80px; width: 80px }
+    .profile > div:first-of-type > div { background-color: var(--background-color-2nd) }
     .profile > div:last-of-type { left: 130px }
     .profile > div:last-of-type > h1 { margin: 5px }
     .profile > div:last-of-type > input { border: 3px dashed var(--background-color-2nd) }
@@ -28,7 +29,7 @@
     by.selector('.profile > div:first-of-type :last-child').style.display = ['none', 'block'][+(username == loggedUser.username)]
     fetchJSON(backEndUrl + `users/${username}`).then(([json, ok]) => {
         if (ok) {
-            by.id('profile-photo').src = avatarUrl(json.id, json.avatar), loggedUser.avatarUrl = avatarUrl(json.id, json.avatar)
+            by.id('profile-photo').src = avatarUrl(json.id, json.avatar)
             by.id('profile-bio-input').value = json.bio, by.id('profile-bio-a').innerText = json.bio
         }
         else { redirect('/404') }
@@ -42,6 +43,7 @@
         if (file.size > 1048576) return alert.error("Bir MB'den büyük dosya yükleyemezsiniz")
         if (file.type.split('/')[0] != 'image' || !imageExtentions.includes(file.type.split('/')[1])) return alert.error('Dosya türü desteklenmiyor')
         var fileForm = new FormData(); fileForm.append("file", file)
+        loggedUser.avatarUrl = avatarUrl(loggedUser.id, -imageExtentions.indexOf(file.type.split('/')[1]) - 1); localStorage.setItem('loggedUser', JSON.stringify(loggedUser))
         loader(true); fetch(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }).then(response => window.location.reload())
     }
 </script>
