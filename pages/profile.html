@@ -26,10 +26,10 @@
     by.id('profile-bio-input').style.display = ['none', 'block'][+(username == loggedUser.username)]
     by.id('profile-bio-a').style.display = ['block', 'none'][+(username == loggedUser.username)]
     by.selector('.profile > div:first-of-type :last-child').style.display = ['none', 'block'][+(username == loggedUser.username)]
-    fetchJSON(backEndUrl + `users/${username}`, true).then(([json, ok]) => {
+    fetchJSON(backEndUrl + `users/${username}`).then(([json, ok]) => {
         if (ok) {
             by.id('profile-photo').src = avatarUrl(json.id, json.avatar), loggedUser.avatarUrl = avatarUrl(json.id, json.avatar)
-            by.id('profile-bio-input').value = json.bio, by.id('profile-bio-a').innerText = json.bio; window.location.reload()
+            by.id('profile-bio-input').value = json.bio, by.id('profile-bio-a').innerText = json.bio
         }
         else { redirect('/404') }
     })
@@ -44,7 +44,6 @@
         var fileForm = new FormData()
         fileForm.append("file", file)
         console.log({ method: 'POST', body: fileForm, headers: { auth: token } })
-        fetch(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }).then(response => {
-        })
+        fetchJSON(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }, true).then(response => window.location.reload())
     }
 </script>
