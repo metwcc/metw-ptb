@@ -41,9 +41,7 @@
         var file = by.id('profile-photo-upload').files[0]; if (!file) return
         if (file.size > 1048576) return alert.error("Bir MB'den büyük dosya yükleyemezsiniz")
         if (file.type.split('/')[0] != 'image' || !imageExtentions.includes(file.type.split('/')[1])) return alert.error('Dosya türü desteklenmiyor')
-        var fileForm = new FormData()
-        fileForm.append("file", file)
-        console.log({ method: 'POST', body: fileForm, headers: { auth: token } })
-        fetchJSON(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }, true).then(response => window.location.reload())
+        var fileForm = new FormData(); fileForm.append("file", file)
+        loader(true); fetch(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }).then(response => window.location.reload())
     }
 </script>
