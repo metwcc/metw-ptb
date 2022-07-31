@@ -114,7 +114,7 @@
     } else by.id('upload-pp').remove()
     fetchJSON(backEndUrl + `users/${profileData.name}`).then(([json, ok]) => {
         if (ok) {
-            profileData.photo.src = cdnUrl + `avatars/${json.id}n${json.avatar}`
+            profileData.photo.src = avatarUrl(json.id, json.avatar)
             profileData.bio.innerText = profileData.bioInput.value = json.bio
             profileData.bioInput.placeholder = 'bir şey yaz!'
             if (profileData.name.includes('*')) profileData.bio.innerHTML = json.bio

@@ -1,4 +1,4 @@
-﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://s3.amazonaws.com/cdn.metw.cc/', url = window.location.origin + '/'
+﻿const backEndUrl = 'http://api.metw/utb/', cdnUrl = 'https://s3.amazonaws.com/cdn.metw.cc/', url = window.location.origin + '/'
 var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
 var token, isLogged = false, loggedUser
@@ -51,6 +51,7 @@ const upload = async (base64, name, type) => {
         } else reject([json, ok])
     })
 }
+const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `avatars/${id}n${avatar}` : `avatars/default${avatar}`)
 //#endregion
 
 
@@ -124,7 +125,7 @@ function getSession() {
     fetchJSON(backEndUrl + 'session', { headers: { auth: token } }).then(([json, ok]) => {
         if (ok)
             fetchJSON(backEndUrl + `users/:${json.id}`).then(([json, ok]) => {
-                if (ok) { loggedUser = json, loggedUser.avatarUrl = cdnUrl + `avatars/${loggedUser.id}n${loggedUser.avatar}`; localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
+                if (ok) { loggedUser = json, loggedUser.avatarUrl = avatarUrl(loggedUser.id, loggedUser.avatar); localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
                 else logged(false)
             })
         else logged(false)
