@@ -15,7 +15,7 @@
         filename.pop()
         filename = filename.join('.')
         file = await fileToBase64(file)
-        upload(file, filename, 'attachment').then(([json, ok]) => {
+        upload(file, filename).then(([json, ok]) => {
             var response = ok ? cdnUrl + json : json
             if (ok) { iframe.src = by.selector('.upload > a').innerText = response; navigator.clipboard.writeText(response) }
             else alert.error(response)
