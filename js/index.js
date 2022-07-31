@@ -1,4 +1,4 @@
-﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://s3.amazonaws.com/cdn.metw.cc/', url = window.location.origin + '/'
+﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://cdn.metw.cc/', url = window.location.origin + '/'
 var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
 var token, isLogged = false, loggedUser
@@ -47,8 +47,8 @@ const upload = async (base64, name, type) => {
         if (ok) {
             var [json2, ok2] = await fetchJSON(backEndUrl + `upload`, { method: 'post', body: { key: Object.keys(json)[0], base64: base64 }, headers: { auth: token } }, true)
             if (ok) resolve([json2, ok2])
-            else reject([json2, ok2])
-        } else reject([json, ok])
+            else resolve([json2, ok2])
+        } else resolve([json, ok])
     })
 }
 const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `avatars/${id}n${avatar}` : `avatars/default${avatar}`)
@@ -95,7 +95,7 @@ function loadPage() {
         case 'giriş': renderPage('login'); return
         case 'kaydol': renderPage('signup'); return
         case 'ev': renderPage('home'); return
-        case 'test': renderPage('test'); return
+        case 'upload': renderPage('upload'); return
     }
     if (pathname[0].startsWith('@')) { renderPage('profile'); return }
     renderPage('404')
