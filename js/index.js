@@ -53,7 +53,7 @@ const upload = async (data, name, type) => {
         } else resolve([json, ok])
     })
 }
-const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `avatars/${id}n${avatar}` : `avatars/default${avatar}`)
+const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `avatars/${id}-${avatar}` : `avatars/default${avatar}`)
 //#endregion
 
 
