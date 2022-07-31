@@ -1,4 +1,4 @@
-﻿const backEndUrl = 'http://api.metw/utb/', cdnUrl = 'https://s3.amazonaws.com/cdn.metw.cc/', url = window.location.origin + '/'
+﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://s3.amazonaws.com/cdn.metw.cc/', url = window.location.origin + '/'
 var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
 var token, isLogged = false, loggedUser
