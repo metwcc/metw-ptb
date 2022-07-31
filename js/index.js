@@ -41,11 +41,13 @@ const filedialog = async (allowedMimes, toBase64) => {
         filedialog.click()
     })
 }
-const upload = async (base64, name, type) => {
+const upload = async (data, name, type) => {
     return await new Promise(async (resolve, reject) => {
         var [json, ok] = await fetchJSON(backEndUrl + `upload?${type ? 'type=' + type : 'type=attachment'}&${name ? 'name=' + name : ''}`, { headers: { auth: token } }, true)
         if (ok) {
-            var [json2, ok2] = await fetchJSON(backEndUrl + `upload`, { method: 'post', body: { key: Object.keys(json)[0], base64: base64 }, headers: { auth: token } }, true)
+            if (typeof data == 'string') var body = { base64: data }
+            else { var body = new FormData(); body.append("file", data) }
+            var [json2, ok2] = await fetchJSON(backEndUrl + `upload?key=${Object.keys(json)[0]}&type=${typeof data == 'string' ? 'base64' : 'form'}`, { method: 'post', body: body, headers: { auth: token } }, true)
             if (ok) resolve([json2, ok2])
             else resolve([json2, ok2])
         } else resolve([json, ok])

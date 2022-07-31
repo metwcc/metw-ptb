@@ -10,7 +10,6 @@
 <script>
     var uploadFile = async () => {
         var file = await filedialog('*'), filename = file.name, iframe = by.selector('.upload > iframe')
-        file = await fileToBase64(file)
         upload(file, filename).then(([json, ok]) => {
             var response = ok ? cdnUrl + json : json
             if (ok) { iframe.src = by.selector('.upload > a').innerText = response; navigator.clipboard.writeText(response) }
