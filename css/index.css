@@ -1,4 +1,4 @@
-* { box-sizing: border-box; color: var(--color); font-family: "Source Code Pro", monospace; }
+* { box-sizing: border-box; color: var(--color); font-family: "Source Code Pro", monospace;-webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important; -webkit-focus-ring-color: rgba(255, 255, 255, 0) !important }
 
 .full-x, .full-size { width: 100%; }
 .full-y, .full-size { height: 100%; }
@@ -9,12 +9,13 @@
 
 .href { color: var(--link-color); text-decoration: underline; cursor: pointer }
 .icon svg, .icon img  { display: inline-flex; align-self: center; height: 1em; width: 1em; top: .2em; position: relative}
-body { background-color: var(--background-color-ground) }
+body { background-color: var(--background-color-ground); overflow: hidden }
 
 input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s }
 input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background-color-3rd) inset !important; -webkit-text-fill-color: var(--color); }
 
-#loader, #captcha { background-color: var(--background-color-top-ground); z-index: 10; display: none; top: 0; position: absolute; user-select: none }
+.top { background-color: var(--background-color-top-ground); z-index: 10; display: none; top: 0; position: absolute; user-select: none }
+#loader { z-index: 9999 }
 #captcha { z-index: 9; transition: 0.3s }
 #captcha > div { width: 360px }
 #captcha-input { width: fit-content }
@@ -46,4 +47,10 @@ input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background
     .app { height: calc(100% - 40px); width: calc(100% - 40px); border-radius: 10px }
     .app > nav  { border-top-left-radius: 10px; border-top-right-radius: 10px }
     .app > main { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px }
-}
+} 
+
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: var(--background-color-1st); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
+::-webkit-scrollbar-thumb { background: var(--background-color-ground); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
+    ::-webkit-scrollbar-thumb:hover { background: var(--background-color-ground); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
+  

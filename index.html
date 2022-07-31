@@ -2,52 +2,61 @@
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
     <title>metw.cc</title>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" sizes="192x192" href="/images/logo/circle-192.png">
     <meta name="theme-color" content="#000000">
     <link rel="canonical" href="https://metw.cc" />
     <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet" />
     <style>
         @import url("/css/index.css");
         @import url("/css/loader.css");
     </style>
     <script src="/js/theme_loader.js"></script>
+    <script defer src="/js/index.js"></script>
 </head>
 <body>
     <div class="app full-size center">
         <nav>
             <div onclick="redirect('/')"><b>metw</b>.cc</div>
             <div id="title-buttons">
-                <!--a onclick="redirect('keşfet')">&nbsp;keşfet&nbsp;</a-->
+                <!--- a onclick="redirect('keşfet')">&nbsp;keşfet&nbsp;</a --->
                 <ul class="non-logged">
                     <li onclick="redirect('giriş')">&nbsp;giriş&nbsp;</li>
                     <li onclick="redirect('kaydol')">&nbsp;katıl&nbsp;</li>
                 </ul>
                 <ul class="logged">
                     <li onclick="redirect('ev')">&nbsp;ev&nbsp;</li>
-                    <li onclick="profile(loggedUser.username)" class="icon">&nbsp;<img id="logged-user-profile-photo" src="https://cdn.metw.cc/avatars/default1.png" /><span class="desktop-screen">&nbsp;<a id="logged-user-username-label">user</a></span>&nbsp;</li>
-                    <li onclick="logout()" class="icon">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>&nbsp;</li>
-                    <li onclick="redirect('ayarlar')" class="icon">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>&nbsp;</li>
+                    <li class="icon" onclick="profile(loggedUser.username)">
+                        &nbsp;<img id="logged-user-profile-photo" src="https://cdn.metw.cc/avatars/default1.png" />
+                              <span class="desktop-screen">&nbsp;<a id="logged-user-username">user</a>&nbsp;</span>
+                    </li>
+                    <li class="icon" onclick="logout()">
+                        &nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>&nbsp;
+                    </li>
+                    <li class="icon" onclick="redirect('ayarlar')">
+                        &nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                        </svg>&nbsp;
+                    </li>
                 </ul>
             </div>
         </nav>
         <main class="full-x" id="main"></main>
-        <div class="full-size" id="captcha" style="display:none">
+        <div class="full-size top" id="captcha" style="display: none">
             <div class="captcha center">
                 <img id="captcha-image" src="" />
                 <button onclick="captcha(0, state = 0)">yenile</button>
                 <input id="captcha-input" placeholder="yukarıdaki sayılar" oninput="customInput(event, 4, /[^\d]/g)">
-                <div>
-                    <button onclick="captcha(0, state = 1)">gönder</button><button onclick="captcha(0, state = 2)">iptal</button>
-                </div>
+                <div><button onclick="captcha(0, state = 1)">gönder</button><button onclick="captcha(0, state = 2)">iptal</button></div>
             </div>
         </div>
-        <div class="full-size" id="loader" style="display:none"><span class="loader center"></span></div>
+        <div class="full-size top" id="loader" style="display: none"><span class="loader center"></span></div>
     </div>
-    <script src="/js/index.js"></script>
 </body>
 </html>

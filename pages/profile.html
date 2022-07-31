@@ -1,49 +1,129 @@
-﻿<div class="profile">
-    <div onmouseover="by.selector('.profile > div:first-of-type :last-child').style.opacity = 0.7" onmouseout="by.selector('.profile > div:first-of-type :last-child').style.opacity = 0">
-        <img height="80" width="80" id="profile-photo" class="center">
-        <div style="opacity: 0" class="center">
-            <label for="profile-photo-upload">değiştir</label>
-            <input id="profile-photo-upload" type="file" style="display: none" oninput="uploadPp()" accept="image/png,image/gif,image/jpeg"/>
-        </div>
+﻿<div class="profile full-x">
+    <div>
+        <img />
+        <div id="upload-pp" onclick="uploadPp()"> <button classs="center-x">değiştir</button> </div>
     </div>
     <div>
-        <h1>@<span id="profile-username"></span></h1>
-        <input id="profile-bio-input" type="text" style="display: none" onfocusout="updateBio(event)"> <a id="profile-bio-a"></a>
+        <h1>@<span></span></h1>
+        <input onfocusout="updateBio(event)" oninput="customInput('', 255)" />
+        <p></p>
     </div>
 </div>
+<div class="full-size top" id="image-crop" style="display: none">
+    <div class="center">
+        <img class="center" />
+        <span class="center"></span><span class="center"></span>
+        <input class="center-x" type="range">
+        <div class="center-x">
+            <button onclick="uploadPp(true)">onayla</button>
+            <button onclick="redirect(pathname[0])">iptal</button>
+        </div>
+    </div>
+</div>    
+
 <style>
-    .profile { background-color: var(--background-color-1st); width: 100%; height: 126px; padding: 10px; border-radius: 10px }
-    .profile > div { display: inline-block; height: 116px; min-width: 80px; position: absolute }
-    .profile > div:first-of-type > * { transition: 0.1s; border-radius: 5px; height: 80px; width: 80px }
-    .profile > div:first-of-type > div { background-color: var(--background-color-2nd) }
-    .profile > div:last-of-type { left: 130px }
-    .profile > div:last-of-type > h1 { margin: 5px }
-    .profile > div:last-of-type > input { border: 3px dashed var(--background-color-2nd) }
-    .profile > div:last-of-type > input:focus { border: 3px solid var(--color) }
+    .profile { background-color: var(--background-color-1st); padding: 10px; border-radius: 10px; height: 150px}
+    .profile > div { display: inline-block; position: absolute }
+    .profile > div:first-of-type { padding: 15px 20px;  height: 120px }
+    .profile > div:first-of-type > * { display: inline-block; height: 100px; position: absolute; border-radius: 10px }
+    .profile > div:last-of-type { margin-left: 150px; width: calc(100% - 190px) }
+    .profile > div:last-of-type > h1 { margin: 0 }
+    .profile > div:last-of-type > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
+    .profile > div:last-of-type > p { width: calc(100% - 70px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
+
+    #upload-pp { width: 100px; height: 100px; display: inline-block; position: absolute; opacity: 0; transition: 0.1s }
+    #upload-pp:hover { opacity: 1 }
+    #upload-pp:hover::after { opacity: 0 }
+    #upload-pp > button { margin-top: 5px; left: 50%; transform: translateX(-50%); position: absolute; background-color: var(--background-color-2nd) }
+    #image-crop { left: 0; user-select: none; -webkit-user-drag: none }
+    #image-crop > div { width: 80%; height: 80%; background-color: var(--background-color-top-1st); border-radius: 15px; padding: 15px; overflow: hidden; border: 10px solid var(--background-color-top-1st); outline: 10px solid rgba(0 0 0 / 0.5); outline-offset: -10px }
+    #image-crop > div > * { -webkit-user-drag: none }
+    #image-crop > div > img { border-radius: 10px }
+    #image-crop > div > input { bottom: 20px; -webkit-appearance: none; background-color: var(--background-color-top-2nd); height: 20px; border-radius: 10px; outline: 2px solid var(--color); padding: 0 }
+    #image-crop > div > input::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin: 0px; border-radius: 50%; background: var(--color); cursor: pointer; outline: 10px solid var(--color); outline-offset: -5px }
+    #image-crop > div > span:first-of-type { border: 3px dashed var(--color); border-radius: 10px; outline: calc(100vw) solid rgba(0 0 0 / 0.5) }
+    #image-crop > div > span:last-of-type { border: 2px solid var(--color); border-radius: 50% }
+    #image-crop > div > div > button { background-color: var(--background-color-top-2nd); border: 5px solid var(--background-color-top-1st); font-size: 120%; z-index: 2 }
 </style>
 <script>
-    var username = pathname[0].substring(1)
-    by.id('profile-username').innerHTML = username
-    by.id('profile-bio-input').style.display = ['none', 'block'][+(username == loggedUser.username)]
-    by.id('profile-bio-a').style.display = ['block', 'none'][+(username == loggedUser.username)]
-    by.selector('.profile > div:first-of-type :last-child').style.display = ['none', 'block'][+(username == loggedUser.username)]
-    fetchJSON(backEndUrl + `users/${username}`).then(([json, ok]) => {
-        if (ok) {
-            by.id('profile-photo').src = avatarUrl(json.id, json.avatar)
-            by.id('profile-bio-input').value = json.bio, by.id('profile-bio-a').innerText = json.bio
+    var profileData = {
+        name: pathname[0].substring(1), photo: by.selector('.profile > div:first-of-type > img'),
+        photoUpload: by.id('upload-pp'), usernameElement: by.selector('.profile > div:last-of-type > h1 > span'),
+        bioInput: by.selector('.profile > div:last-of-type > input'), bio: by.selector('.profile > div:last-of-type > p'),
+        div: by.selector('.profile > div:last-of-type')
+    }
+    var uploadPp = async (state) => {
+        if (state) {
+            ic.ratio2 = Math.max(ic.img.sizeX, ic.img.sizeY) / ic.len / ic.img.scale
+            var p = [Math.abs(ic.img.xPosition + ic.frameSize / 2 - ic.img.width / 2) * ic.ratio2, Math.abs(ic.img.yPosition + ic.frameSize / 2 - ic.img.height / 2) * ic.ratio2,
+            Math.abs(ic.img.xPosition - ic.frameSize / 2 - ic.img.width / 2) * ic.ratio2, Math.abs(ic.img.yPosition - ic.frameSize / 2 - ic.img.height / 2) * ic.ratio2]
+            ic.context.drawImage(ic.img, p[0], p[1], p[2] - p[0], p[3] - p[1], 0, 0, 512, 512)
+            ic.data = ic.canvas.toDataURL()
+            ic.context.clearRect(0, 0, ic.canvas.width, ic.canvas.height)
+            ic.input.style.display = by.selector('#image-crop > div > div').style.display = ic.frames[1].style.display = ic.frames[0].style.border = 'none'
+            upload(ic.data, '', 'avatar').then(([json, ok]) => {
+                if (ok) { loggedUser.avatarUrl = cdnUrl + json; localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
+                else alert.error(json); redirect(pathname[0])
+            })
         }
-        else { redirect('/404') }
+        else {
+            ic.canvas = document.createElement('canvas'), ic.canvas.height = ic.canvas.width = 512, ic.context = ic.canvas.getContext("2d")
+            ic.img.src = await filedialog('image/png,image/jpeg', true)
+            ic.style.display = 'flex'; ic.img.xPosition = 0, ic.img.yPosition = 0
+            ic.img.xPosition = ic.img.yPosition = 0, ic.img.scale = 1
+            ic.img.style.top = ic.img.style.left = '50%'
+        }
+    }
+    profileData.usernameElement.innerText = profileData.name
+    profileData.photoUpload.display = ['block', 'none'][+(loggedUser && profileData.name == loggedUser.username)]
+    if (loggedUser && profileData.name == loggedUser.username) {
+        profileData.bio.style.display = 'none'
+        profileData.bioInput.style.display = 'block'
+        //image crop
+        var ic = by.id('image-crop'); ic.click = false, ic.touch = [0, 0], ic.enableTouchMove = true
+        ic.frames = by.selectorAll('#image-crop > div > span'), ic.div = by.selector('#image-crop > div'),
+            ic.img = by.selector('#image-crop > div > img'), ic.input = by.selector('#image-crop > div > input')
+        ic.fixSizes = () => {
+            for (let frame of ic.frames) frame.style.width = frame.style.height = ic.frameSize
+            ic.input.style.width = ic.frameSize
+            if (ic.img.width < ic.img.height) ic.img.style.height = ic.len * ic.img.scale
+            else ic.img.style.width = ic.len * ic.img.scale
+        }
+        ic.moveImage = (x, y) => {
+            ic.img.xPosition += x || 0, ic.img.yPosition += y || 0
+            if (ic.img.xPosition > ic.img.width / 2 - ic.frameSize / 2) ic.img.xPosition = ic.img.width / 2 - ic.frameSize / 2
+            if (ic.img.yPosition > ic.img.height / 2 - ic.frameSize / 2) ic.img.yPosition = ic.img.height / 2 - ic.frameSize / 2
+            if (ic.img.xPosition < -ic.img.width / 2 + ic.frameSize / 2) ic.img.xPosition = -ic.img.width / 2 + ic.frameSize / 2
+            if (ic.img.yPosition < -ic.img.height / 2 + ic.frameSize / 2) ic.img.yPosition = -ic.img.height / 2 + ic.frameSize / 2
+            ic.img.style.left = `calc(50% + ${ic.img.xPosition}px)`, ic.img.style.top = `calc(50% + ${ic.img.yPosition}px)`
+        }
+        ic.img.onload = () => {
+            ic.ratio = (Math.min(ic.img.width, ic.img.height) / Math.max(ic.img.width, ic.img.height)), ic.img.sizeX = ic.img.width, ic.img.sizeY = ic.img.height
+            ic.frameSize = Math.min(ic.div.clientWidth, ic.div.clientHeight) / 2
+            ic.len = Math.min(ic.div.clientWidth, ic.div.clientHeight)
+            ic.img.scale = ic.input.value = ic.input.min = 50 / ic.ratio, ic.input.max = 200 / ic.ratio, ic.img.scale = ic.img.scale / 100
+            ic.fixSizes()
+        }
+        window.onresize = ic.fixSizes
+        ic.input.oninput = () => { ic.img.scale = ic.input.value / 100; ic.fixSizes(); ic.click = false; ic.moveImage() }
+        ic.onmousedown = () => ic.click = true; ic.onmouseup = () => ic.click = false
+        ic.onmousemove = event => { if (ic.click) ic.moveImage(event.movementX, event.movementY) }
+        ic.input.ontouchstart = () => { ic.enableTouchMove = false }; ic.input.ontouchend = () => ic.enableTouchMove = true
+        ic.ontouchstart = ({ touches: [{ screenX, screenY }] }) => ic.touch = [screenX, screenY]
+        ic.ontouchmove = ({ target, touches: [{ screenX, screenY }] }) => { if (ic.enableTouchMove) ic.moveImage(screenX - ic.touch[0], screenY - ic.touch[1]); ic.touch = [screenX, screenY] }
+    } else by.id('upload-pp').remove()
+    fetchJSON(backEndUrl + `users/${profileData.name}`).then(([json, ok]) => {
+        if (ok) {
+            profileData.photo.src = cdnUrl + `avatars/${json.id}n${json.avatar}`
+            profileData.bio.innerText = profileData.bioInput.value = json.bio
+            profileData.bioInput.placeholder = 'bir şey yaz!'
+            if (profileData.name.includes('*')) profileData.bio.innerHTML = json.bio
+            profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
+        }
+        else redirect('404')
     })
-    function updateBio({ target }) {
-        target.value = target.value.substring(0, 255)
-        fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ name: 'update-bio', content: target.value }], headers: { auth: token } }, true)
-    }
-    function uploadPp() {
-        var file = by.id('profile-photo-upload').files[0]; if (!file) return
-        if (file.size > 1048576) return alert.error("Bir MB'den büyük dosya yükleyemezsiniz")
-        if (file.type.split('/')[0] != 'image' || !imageExtentions.includes(file.type.split('/')[1])) return alert.error('Dosya türü desteklenmiyor')
-        var fileForm = new FormData(); fileForm.append("file", file)
-        loggedUser.avatarUrl = avatarUrl(loggedUser.id, -imageExtentions.indexOf(file.type.split('/')[1]) - 1); localStorage.setItem('loggedUser', JSON.stringify(loggedUser))
-        loader(true); fetch(backEndUrl + 'upload/pp', { method: 'POST', body: fileForm, headers: { auth: token } }).then(response => window.location.reload())
-    }
+    var updateBio = ({ target }) => fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true),
+        resizeProfileDiv = () => profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
+    document.body.onresize = resizeProfileDiv
+
 </script>
