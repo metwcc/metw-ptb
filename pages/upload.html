@@ -1,18 +1,24 @@
 ﻿<div class="upload">
-    <button class="center-x" onclick="uploadFile()">upload</button><a class="center-x"></a>
+    <div class="center-x full-x"><button onclick="uploadFile()" class="center-x">seç</button> <input /> <button onclick="navigator.share({ url: by.selector('.upload > div > input').value })">paylaş</button></div>
     <iframe></iframe>
 </div>
 <style>
-    .upload > button { font-size: 150% }
-    .upload > a { margin-top: 50px }
-    .upload > iframe { width: 100%; height: calc(100% - 75px); margin-top: 75px; border: none }
+    .upload > div { padding: 0 30px }
+    .upload > div > * { font-size: 100%; width: 80px; margin: 0 2.5px }
+    .upload > div > input { width: calc( 100% - 200px) }
+    .upload > div > input, .upload > div > button:last-of-type { display: none }
+    .upload > iframe { width: 100%; height: calc(100% - 70px); margin-top: 70px; border: none }
 </style>
 <script>
     var uploadFile = async () => {
         var file = await filedialog('*'), filename = file.name, iframe = by.selector('.upload > iframe')
         upload(file, filename).then(([json, ok]) => {
             var response = ok ? cdnUrl + json : json
-            if (ok) { iframe.src = by.selector('.upload > a').innerText = response; navigator.clipboard.writeText(response) }
+            if (ok) {
+                iframe.src = by.selector('.upload > div > input').value = response; navigator.clipboard.writeText(response)
+                by.selector('.upload > div > button:first-of-type').className = ''
+                by.selector('.upload > div > input').style.display = by.selector('.upload > div > button:last-of-type').style.display = 'inline-block'
+            }
             else alert.error(response)
         })
     }
