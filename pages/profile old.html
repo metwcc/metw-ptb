@@ -34,7 +34,7 @@
             else by.id('profile-photo').src = avatarUrl(json.id, json.avatar)
             by.id('profile-bio-input').value = json.bio, by.id('profile-bio-a').innerText = json.bio
         }
-        else { redirect('/404') }
+        else { redirect('404') }
     })
     function updateBio({ target }) {
         target.value = target.value.substring(0, 255)

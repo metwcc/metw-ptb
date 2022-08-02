@@ -17,7 +17,7 @@
         if (confirmPassword != password) { alert.error("Şifreler uyuşmuyor"); return false }
         if (validated) {
             fetchJSON(backEndUrl + 'signup', { method: 'post', body: { username: username, password: password, captchaKey: captchaKey } }, true).then(([json, ok]) => {
-                if (ok) { alert.success('Hesabınız oluşturuldu, giriş yapabilirsiniz'); redirect('/giriş') }
+                if (ok) { alert.success('Hesabınız oluşturuldu, giriş yapabilirsiniz'); redirect('/giriş', 'Giriş') }
                 else alert.error(json)
             })
         } else captcha(() => signup(true))

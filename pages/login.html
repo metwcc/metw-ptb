@@ -1,5 +1,5 @@
 ﻿<form id="login-form" class="center" action="javascript:login()">
-    <input id="login-form-username" placeholder="kullanıcı adı" oninput="customInput(event, 20, /[^\w-*]/g)" />
+    <input id="login-form-username" placeholder="kullanıcı adı" oninput="customInput(event, 20, /[^\w-]/g)" />
     <br /><input id="login-form-password" type="password" placeholder="şifre" oninput="customInput(event, 128)" />
     <br />
     <br /><button class="center-x">Giriş yap</button>
@@ -14,7 +14,7 @@
         if (username.length < 4) { alert.error("Kullanıcı adı 4 karakterden kısa olamaz"); return false }
         if (password.length < 4) { alert.error("Şifre 4 karakterden kısa olamaz"); return false }
         fetchJSON(backEndUrl + 'login', { method: 'post', body: { username: username, password: password } }, true).then(([json, ok]) => {
-            if (ok) { localStorage.setItem('token', json); redirect('/ev') }
+            if (ok) { localStorage.setItem('token', json); redirect('ev?', 'Ana Sayfa') }
             else alert.error(json)
         })
     }

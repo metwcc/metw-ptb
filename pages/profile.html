@@ -5,7 +5,7 @@
     </div>
     <div>
         <h1>@<span></span></h1>
-        <input onfocusout="updateBio(event)" oninput="customInput('', 255)" />
+        <input onfocusout="updateBio(event)" oninput="customInput(event, 255, /[^\s\S]/g)" />
         <p></p>
     </div>
 </div>
@@ -52,78 +52,80 @@
         bioInput: by.selector('.profile > div:last-of-type > input'), bio: by.selector('.profile > div:last-of-type > p'),
         div: by.selector('.profile > div:last-of-type')
     }
-    var uploadPp = async (state) => {
-        if (state) {
-            ic.ratio2 = Math.max(ic.img.sizeX, ic.img.sizeY) / ic.len / ic.img.scale
-            var p = [Math.abs(ic.img.xPosition + ic.frameSize / 2 - ic.img.width / 2) * ic.ratio2, Math.abs(ic.img.yPosition + ic.frameSize / 2 - ic.img.height / 2) * ic.ratio2,
-            Math.abs(ic.img.xPosition - ic.frameSize / 2 - ic.img.width / 2) * ic.ratio2, Math.abs(ic.img.yPosition - ic.frameSize / 2 - ic.img.height / 2) * ic.ratio2]
-            ic.context.drawImage(ic.img, p[0], p[1], p[2] - p[0], p[3] - p[1], 0, 0, 512, 512)
-            ic.data = ic.canvas.toDataURL()
-            ic.context.clearRect(0, 0, ic.canvas.width, ic.canvas.height)
-            ic.input.style.display = by.selector('#image-crop > div > div').style.display = ic.frames[1].style.display = ic.frames[0].style.border = 'none'
-            upload(ic.data, '', 'avatar').then(([json, ok]) => {
-                if (ok) { loggedUser.avatarUrl = cdnUrl + json; localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
-                else alert.error(json); redirect(pathname[0])
-            })
-        }
-        else {
-            ic.canvas = document.createElement('canvas'), ic.canvas.height = ic.canvas.width = 512, ic.context = ic.canvas.getContext("2d")
-            ic.img.src = await filedialog('image/png,image/jpeg', true)
-            ic.style.display = 'flex'; ic.img.xPosition = 0, ic.img.yPosition = 0
-            ic.img.xPosition = ic.img.yPosition = 0, ic.img.scale = 1
-            ic.img.style.top = ic.img.style.left = '50%'
-        }
-    }
     profileData.usernameElement.innerText = profileData.name
     profileData.photoUpload.display = ['block', 'none'][+(loggedUser && profileData.name == loggedUser.username)]
-    if (loggedUser && profileData.name == loggedUser.username) {
-        profileData.bio.style.display = 'none'
-        profileData.bioInput.style.display = 'block'
-        //image crop
-        var ic = by.id('image-crop'); ic.click = false, ic.touch = [0, 0], ic.enableTouchMove = true
-        ic.frames = by.selectorAll('#image-crop > div > span'), ic.div = by.selector('#image-crop > div'),
-            ic.img = by.selector('#image-crop > div > img'), ic.input = by.selector('#image-crop > div > input')
-        ic.fixSizes = () => {
-            for (let frame of ic.frames) frame.style.width = frame.style.height = ic.frameSize
-            ic.input.style.width = ic.frameSize
-            if (ic.img.width < ic.img.height) ic.img.style.height = ic.len * ic.img.scale
-            else ic.img.style.width = ic.len * ic.img.scale
-        }
-        ic.moveImage = (x, y) => {
-            ic.img.xPosition += x || 0, ic.img.yPosition += y || 0
-            if (ic.img.xPosition > ic.img.width / 2 - ic.frameSize / 2) ic.img.xPosition = ic.img.width / 2 - ic.frameSize / 2
-            if (ic.img.yPosition > ic.img.height / 2 - ic.frameSize / 2) ic.img.yPosition = ic.img.height / 2 - ic.frameSize / 2
-            if (ic.img.xPosition < -ic.img.width / 2 + ic.frameSize / 2) ic.img.xPosition = -ic.img.width / 2 + ic.frameSize / 2
-            if (ic.img.yPosition < -ic.img.height / 2 + ic.frameSize / 2) ic.img.yPosition = -ic.img.height / 2 + ic.frameSize / 2
-            ic.img.style.left = `calc(50% + ${ic.img.xPosition}px)`, ic.img.style.top = `calc(50% + ${ic.img.yPosition}px)`
-        }
-        ic.img.onload = () => {
-            ic.ratio = (Math.min(ic.img.width, ic.img.height) / Math.max(ic.img.width, ic.img.height)), ic.img.sizeX = ic.img.width, ic.img.sizeY = ic.img.height
-            ic.frameSize = Math.min(ic.div.clientWidth, ic.div.clientHeight) / 2
-            ic.len = Math.min(ic.div.clientWidth, ic.div.clientHeight)
-            ic.img.scale = ic.input.value = ic.input.min = 50 / ic.ratio, ic.input.max = 200 / ic.ratio, ic.img.scale = ic.img.scale / 100
-            ic.fixSizes()
-        }
-        window.onresize = ic.fixSizes
-        ic.input.oninput = () => { ic.img.scale = ic.input.value / 100; ic.fixSizes(); ic.click = false; ic.moveImage() }
-        ic.onmousedown = () => ic.click = true; ic.onmouseup = () => ic.click = false
-        ic.onmousemove = event => { if (ic.click) ic.moveImage(event.movementX, event.movementY) }
-        ic.input.ontouchstart = () => { ic.enableTouchMove = false }; ic.input.ontouchend = () => ic.enableTouchMove = true
-        ic.ontouchstart = ({ touches: [{ screenX, screenY }] }) => ic.touch = [screenX, screenY]
-        ic.ontouchmove = ({ target, touches: [{ screenX, screenY }] }) => { if (ic.enableTouchMove) ic.moveImage(screenX - ic.touch[0], screenY - ic.touch[1]); ic.touch = [screenX, screenY] }
-    } else by.id('upload-pp').remove()
     fetchJSON(backEndUrl + `users/${profileData.name}`).then(([json, ok]) => {
         if (ok) {
             profileData.photo.src = avatarUrl(json.id, json.avatar)
+            profileData.usernameElement.innerText = json.username + (getFlag(json.flags, 'mod') ? '*' : '')
             profileData.bio.innerText = profileData.bioInput.value = json.bio
             profileData.bioInput.placeholder = 'bir şey yaz!'
-            if (profileData.name.includes('*')) profileData.bio.innerHTML = json.bio
+            if (getFlag(json.flags, 'mod')) profileData.bio.innerHTML = json.bio
             profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
         }
         else redirect('404')
     })
-    var updateBio = ({ target }) => fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true),
-        resizeProfileDiv = () => profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
-    document.body.onresize = resizeProfileDiv
+    var updateBio = ({ target }) => fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true)
+    document.body.onresize = () => profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
 
+
+    //#region CHANGE-PP
+    if (loggedUser && profileData.name == loggedUser.username) {
+        profileData.bio.style.display = 'none'
+        profileData.bioInput.style.display = 'block'
+        var uploadPp = async (state) => {
+            if (state) {
+                imageCrop.ratio2 = Math.max(imageCrop.img.sizeX, imageCrop.img.sizeY) / imageCrop.len / imageCrop.img.scale
+                var p = [Math.abs(imageCrop.img.xPosition + imageCrop.frameSize / 2 - imageCrop.img.width / 2) * imageCrop.ratio2, Math.abs(imageCrop.img.yPosition + imageCrop.frameSize / 2 - imageCrop.img.height / 2) * imageCrop.ratio2,
+                Math.abs(imageCrop.img.xPosition - imageCrop.frameSize / 2 - imageCrop.img.width / 2) * imageCrop.ratio2, Math.abs(imageCrop.img.yPosition - imageCrop.frameSize / 2 - imageCrop.img.height / 2) * imageCrop.ratio2]
+                imageCrop.context.drawImage(imageCrop.img, p[0], p[1], p[2] - p[0], p[3] - p[1], 0, 0, 512, 512)
+                imageCrop.data = imageCrop.canvas.toDataURL()
+                imageCrop.context.clearRect(0, 0, imageCrop.canvas.width, imageCrop.canvas.height)
+                imageCrop.input.style.display = by.selector('#image-crop > div > div').style.display = imageCrop.frames[1].style.display = imageCrop.frames[0].style.border = 'none'
+                upload(imageCrop.data, '', 'usercontent-avatar').then(([json, ok]) => {
+                    if (ok) { loggedUser.avatarUrl = cdnUrl + json; localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
+                    else alert.error(json); redirect(pathname[0])
+                })
+            }
+            else {
+                imageCrop.canvas = document.createElement('canvas'), imageCrop.canvas.height = imageCrop.canvas.width = 512, imageCrop.context = imageCrop.canvas.getContext("2d")
+                imageCrop.img.src = await filedialog('image/png,image/jpeg', true)
+                imageCrop.style.display = 'flex'; imageCrop.img.xPosition = 0, imageCrop.img.yPosition = 0
+                imageCrop.img.xPosition = imageCrop.img.yPosition = 0, imageCrop.img.scale = 1
+                imageCrop.img.style.top = imageCrop.img.style.left = '50%'
+            }
+        }
+        var imageCrop = by.id('image-crop'); imageCrop.click = false, imageCrop.touch = [0, 0], imageCrop.enableTouchMove = true
+        imageCrop.frames = by.selectorAll('#image-crop > div > span'), imageCrop.div = by.selector('#image-crop > div'),
+            imageCrop.img = by.selector('#image-crop > div > img'), imageCrop.input = by.selector('#image-crop > div > input')
+        imageCrop.fixSizes = () => {
+            for (let frame of imageCrop.frames) frame.style.width = frame.style.height = imageCrop.frameSize
+            imageCrop.input.style.width = imageCrop.frameSize
+            if (imageCrop.img.width < imageCrop.img.height) imageCrop.img.style.height = imageCrop.len * imageCrop.img.scale
+            else imageCrop.img.style.width = imageCrop.len * imageCrop.img.scale
+        }
+        imageCrop.moveImage = (x, y) => {
+            imageCrop.img.xPosition += x || 0, imageCrop.img.yPosition += y || 0
+            if (imageCrop.img.xPosition > imageCrop.img.width / 2 - imageCrop.frameSize / 2) imageCrop.img.xPosition = imageCrop.img.width / 2 - imageCrop.frameSize / 2
+            if (imageCrop.img.yPosition > imageCrop.img.height / 2 - imageCrop.frameSize / 2) imageCrop.img.yPosition = imageCrop.img.height / 2 - imageCrop.frameSize / 2
+            if (imageCrop.img.xPosition < -imageCrop.img.width / 2 + imageCrop.frameSize / 2) imageCrop.img.xPosition = -imageCrop.img.width / 2 + imageCrop.frameSize / 2
+            if (imageCrop.img.yPosition < -imageCrop.img.height / 2 + imageCrop.frameSize / 2) imageCrop.img.yPosition = -imageCrop.img.height / 2 + imageCrop.frameSize / 2
+            imageCrop.img.style.left = `calc(50% + ${imageCrop.img.xPosition}px)`, imageCrop.img.style.top = `calc(50% + ${imageCrop.img.yPosition}px)`
+        }
+        imageCrop.img.onload = () => {
+            imageCrop.ratio = (Math.min(imageCrop.img.width, imageCrop.img.height) / Math.max(imageCrop.img.width, imageCrop.img.height)), imageCrop.img.sizeX = imageCrop.img.width, imageCrop.img.sizeY = imageCrop.img.height
+            imageCrop.frameSize = Math.min(imageCrop.div.clientWidth, imageCrop.div.clientHeight) / 2
+            imageCrop.len = Math.min(imageCrop.div.clientWidth, imageCrop.div.clientHeight)
+            imageCrop.img.scale = imageCrop.input.value = imageCrop.input.min = 50 / imageCrop.ratio, imageCrop.input.max = 200 / imageCrop.ratio, imageCrop.img.scale = imageCrop.img.scale / 100
+            imageCrop.fixSizes()
+        }
+        window.onresize = imageCrop.fixSizes
+        imageCrop.input.oninput = () => { imageCrop.img.scale = imageCrop.input.value / 100; imageCrop.fixSizes(); imageCrop.click = false; imageCrop.moveImage() }
+        imageCrop.onmousedown = () => imageCrop.click = true; imageCrop.onmouseup = () => imageCrop.click = false
+        imageCrop.onmousemove = event => { if (imageCrop.click) imageCrop.moveImage(event.movementX, event.movementY) }
+        imageCrop.input.ontouchstart = () => { imageCrop.enableTouchMove = false }; imageCrop.input.ontouchend = () => imageCrop.enableTouchMove = true
+        imageCrop.ontouchstart = ({ touches: [{ screenX, screenY }] }) => imageCrop.touch = [screenX, screenY]
+        imageCrop.ontouchmove = ({ target, touches: [{ screenX, screenY }] }) => { if (imageCrop.enableTouchMove) imageCrop.moveImage(screenX - imageCrop.touch[0], screenY - imageCrop.touch[1]); imageCrop.touch = [screenX, screenY] }
+    } else by.id('upload-pp').remove()
+    //#endregion
 </script>

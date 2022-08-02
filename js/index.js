@@ -17,7 +17,7 @@ const clearListeners = selector => {
     oldElement.remove(); return newElement
 }
 const loader = state => by.id('loader').style.display = ['none', 'flex'][+state] 
-const customInput = ({ srcElement }, length, regex) => { srcElement.value = srcElement.value.replace(regex ? regex : '', '').substring(0, length) }
+const customInput = ({ srcElement }, length, regex) => { if (srcElement && srcElement.value) srcElement.value = srcElement.value.replace(regex ? regex : '', '').substring(0, length) }
 alert.error = error => alert(typeof error == 'object' ? error[0] : error) //reserved for future usage
 alert.success = text => alert(text) //reserved for future usage
 const fetchJSON = (input, ...init) => {
@@ -26,7 +26,7 @@ const fetchJSON = (input, ...init) => {
         conf.fetchInit.headers = conf.fetchInit.headers ? { 'Content-Type': 'application/json', ...conf.fetchInit.headers } : { 'Content-Type': 'application/json' },
             conf.fetchInit.body = JSON.stringify(conf.fetchInit.body)
     return fetch(input, conf.fetchInit).then(response => { if (conf.showLoader) loader(false); ok = response.ok; return response.json() })
-        .then(json => [json, ok]).catch(error => { alert.error(`Sunucuya bağlanılamadı: '${error}'`); if (conf.showLoader) window.location.reload() })
+        .then(json => [json, ok]).catch(error => { if (conf.showLoader) window.location.reload() })
 }
 const fileToBase64 = async file => new Promise((resolve) => {
     let reader = new FileReader()
@@ -53,7 +53,8 @@ const upload = async (data, name, type) => {
         } else resolve([json, ok])
     })
 }
-const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `avatars/${id}-${avatar}` : `avatars/default${avatar}`)
+const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `usercontent/${id}/${avatar}` : `avatars/default${avatar}`)
+const getFlag = (num, flag) => ((num >> ['staff', 'mod', 'partner', 'bugHunter', 'premium'].indexOf(flag)) % 2 != 0)
 //#endregion
 
 
@@ -89,17 +90,17 @@ function renderPage(name) {
         iframe.innerHTML = pageData[name]; let scriptElement = document.createElement('script'); scriptElement.innerHTML = scripts; iframe.appendChild(scriptElement)
     } else { loader(true); fetch(`/pages/${name}.html`).then(function (response) { response.text().then(function (text) { pageData[name] = text; loader(false); renderPage(name) }) }); }
 }
-const redirect = (path, title) => { window.history.pushState(null, title, path); loadPage() }
-function loadPage() {
+const redirect = (path, title) => { window.history.pushState(null, title, path); document.title = (title ? (title == '404' ? 'Sayfa Bulunamadı' : title) + ' • metw.cc' : 'metw.cc'); loadPage() }
+async function loadPage() {
     [pathname, search] = formatUri()
     if (pathname.length == 0) { renderPage('homepage'); return }
     switch (pathname[0]) {
         case 'giriş': renderPage('login'); return
         case 'kaydol': renderPage('signup'); return
-        case 'ev': renderPage('home'); return
-        case 'upload': renderPage('upload'); return
+        case 'ev': session(window.location.href.endsWith('?')); renderPage('home'); return
+        case 'upload': session(); renderPage('upload'); return
     }
-    if (pathname[0].startsWith('@')) { renderPage('profile'); return }
+    if (pathname[0].startsWith('@')) { session(); renderPage('profile'); return }
     renderPage('404')
 }
 //#endregion
@@ -122,19 +123,21 @@ function logged(state) {
     else localStorage.removeItem('token')
 }
 function logout() { logged(false); redirect('/') }
-function getSession() {
-    token = localStorage.getItem('token')
-    fetchJSON(backEndUrl + 'session', { headers: { auth: token } }).then(([json, ok]) => {
-        if (ok)
-            fetchJSON(backEndUrl + `users/:${json.id}`).then(([json, ok]) => {
-                if (ok) { loggedUser = json, loggedUser.avatarUrl = avatarUrl(loggedUser.id, loggedUser.avatar); localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
-                else logged(false)
-            })
+function session(detailed) {
+    token = localStorage.getItem('token'); if (!token) return
+    return new Promise(async resolve => {
+        var [json, ok] = await fetchJSON(backEndUrl + 'session', { headers: { auth: token } })
+        if (ok) resolve(detailed ?
+            (async () => {
+                var [details, ok2] = await fetchJSON(backEndUrl + `users/:${json.id}`)
+                loggedUser = details, loggedUser.avatarUrl = avatarUrl(details.id, details.avatar)
+                localStorage.setItem('loggedUser', JSON.stringify(details)); logged(true); return details
+            })() : json)
         else logged(false)
     })
 }
 //#endregion
 
-window.onpopstate = loadPage
+window.onpopstate = loadPage; session(true)
 logged(localStorage.getItem('logged') == 'true'); loadPage(); loader(false)
 if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/serviceWorker.js') }) }
