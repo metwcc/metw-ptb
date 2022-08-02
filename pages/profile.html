@@ -8,6 +8,14 @@
         <input onfocusout="updateBio(event)" oninput="customInput(event, 255, /[^\s\S]/g)" />
         <p></p>
     </div>
+    <div class="center-y">
+        <button class="icon" onclick="follow()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H13.77a1.15,1.15,0,1,0,0,2.29h5.08a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path class="cls-1" d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H17.46V5a1.15,1.15,0,0,0-2.3,0V6.41H13.77a1.15,1.15,0,1,0,0,2.29h1.39v1.37a1.15,1.15,0,0,0,2.3,0V8.7h1.39a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg>
+            <span>takip et</span>
+        </button>
+        <span></span> takip
+        <br /><span></span> takipçi
+    </div>
 </div>
 <div class="full-size top" id="image-crop" style="display: none">
     <div class="center">
@@ -22,14 +30,17 @@
 </div>    
 
 <style>
-    .profile { background-color: var(--background-color-1st); padding: 10px; border-radius: 10px; height: 150px}
+    .profile { background-color: var(--background-color-1st); padding: 10px; height: 150px; transform: translate(-30px, -30px); width: calc(100% + 60px); box-shadow: 0px 1px 1px var(--background-color-top-1st) inset }
     .profile > div { display: inline-block; position: absolute }
     .profile > div:first-of-type { padding: 15px 20px;  height: 120px }
     .profile > div:first-of-type > * { display: inline-block; height: 100px; position: absolute; border-radius: 10px }
-    .profile > div:last-of-type { margin-left: 150px; width: calc(100% - 190px) }
-    .profile > div:last-of-type > h1 { margin: 0 }
-    .profile > div:last-of-type > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
-    .profile > div:last-of-type > p { width: calc(100% - 70px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
+    .profile > div:nth-of-type(2) { margin-left: 150px; width: calc(100% - 190px) }
+    .profile > div:nth-of-type(2) > h1 { margin: 0 }
+    .profile > div:nth-of-type(2) > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
+    .profile > div:nth-of-type(2) > p { width: calc(100% - 160px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
+    .profile > div:last-of-type { font-size: 100%; right: 10px }
+    .profile > div:last-of-type > button { font-size: 100%; background-color: #1EB955; display: none }
+    .profile > div:last-of-type > svg { display: none }
 
     #upload-pp { width: 100px; height: 100px; display: inline-block; position: absolute; opacity: 0; transition: 0.1s }
     #upload-pp:hover { opacity: 1 }
@@ -46,33 +57,52 @@
     #image-crop > div > div > button { background-color: var(--background-color-top-2nd); border: 5px solid var(--background-color-top-1st); font-size: 120%; z-index: 2 }
 </style>
 <script>
-    var profileData = {
+    var pd = {
         name: pathname[0].substring(1), photo: by.selector('.profile > div:first-of-type > img'),
-        photoUpload: by.id('upload-pp'), usernameElement: by.selector('.profile > div:last-of-type > h1 > span'),
-        bioInput: by.selector('.profile > div:last-of-type > input'), bio: by.selector('.profile > div:last-of-type > p'),
-        div: by.selector('.profile > div:last-of-type')
-    }
-    profileData.usernameElement.innerText = profileData.name
-    profileData.photoUpload.display = ['block', 'none'][+(loggedUser && profileData.name == loggedUser.username)]
-    fetchJSON(backEndUrl + `users/${profileData.name}`).then(([json, ok]) => {
+        div: by.selector('.profile > div:nth-of-type(2)'), photoUpload: by.id('upload-pp'), usernameElement: by.selector('.profile > div:nth-of-type(2) > h1 > span'),
+        bioInput: by.selector('.profile > div:nth-of-type(2) > input'), bio: by.selector('.profile > div:nth-of-type(2) > p'),
+        followings: by.selector('.profile > div:last-of-type > span:first-of-type'), followers: by.selector('.profile > div:last-of-type > span:last-of-type'),
+        unfollowSvg: by.selector('.profile > div:last-of-type > button > svg:first-of-type'), followSvg: by.selector('.profile > div:last-of-type > button > svg:last-of-type'),
+        followButton: by.selector('.profile > div:last-of-type > button')
+    }; pd.isLoggedUsser = loggedUser && pd.name == loggedUser.username
+    pd.usernameElement.innerText = pd.name
+
+    fetchJSON(backEndUrl + `users/${pd.name}` + (loggedUser ? `?id=${loggedUser.id}` : '')).then(([json, ok]) => {
         if (ok) {
-            profileData.photo.src = avatarUrl(json.id, json.avatar)
-            profileData.usernameElement.innerText = json.username + (getFlag(json.flags, 'mod') ? '*' : '')
-            profileData.bio.innerText = profileData.bioInput.value = json.bio
-            profileData.bioInput.placeholder = 'bir şey yaz!'
-            if (getFlag(json.flags, 'mod')) profileData.bio.innerHTML = json.bio
-            profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
+            pd.photo.src = avatarUrl(json.id, json.avatar)
+            pd.usernameElement.innerText = json.username + (getFlag(json.flags, 'mod') ? '*' : '')
+            pd.bio.innerText = pd.bioInput.value = json.bio, pd.bioInput.placeholder = 'bir şey yaz!'
+            pd.followings.innerText = json.followings, pd.followers.innerText = json.followers
+            pd.unfollowSvg.style.display = ['none', 'inline-block'][+json.followed_by_you], pd.followSvg.style.display = ['inline-block', 'none'][+json.followed_by_you]
+            by.selector('.profile > div:last-of-type > button > span').innerText = ['takip et', 'takipten çık'][+json.followed_by_you]
+            pd.followButton.style.backgroundColor = ['#1EB955', 'red'][+json.followed_by_you]
+            pd.followButton.style.display = ['block', 'none'][+(pd.isLoggedUsser || !loggedUser.id)]
+            pd.profile = json
+            if (getFlag(json.flags, 'mod')) pd.bio.innerHTML = json.bio
+            pd.div.style.paddingTop = (120 - pd.div.clientHeight) / 2
         }
         else redirect('404')
     })
-    var updateBio = ({ target }) => fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true)
-    document.body.onresize = () => profileData.div.style.paddingTop = (120 - profileData.div.clientHeight) / 2
 
+    var follow = (s) => {
+        fetchJSON(backEndUrl + `users/${pd.profile.id}/${pd.profile.followed_by_you ? 'un' : ''}follow`, { headers: { auth: token } }, true).then(([json, ok]) => {
+            pd.profile.followers += (pd.profile.followed_by_you ? -1 : 1)
+            pd.followers.innerText = pd.profile.followers
+            pd.profile.followed_by_you = !pd.profile.followed_by_you
+            pd.unfollowSvg.style.display = ['none', 'inline-block'][+pd.profile.followed_by_you], pd.followSvg.style.display = ['inline-block', 'none'][+pd.profile.followed_by_you]
+            by.selector('.profile > div:last-of-type > button > span').innerText = ['takip et', 'takipten çık'][+pd.profile.followed_by_you]
+            pd.followButton.style.backgroundColor = ['#1EB955', 'red'][+pd.profile.followed_by_you]
+        })
+    }
+
+    var updateBio = ({ target }) => fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true)
+    document.body.onresize = () => pd.div.style.paddingTop = (120 - pd.div.clientHeight) / 2
+
+    pd.bio.style.display = ['block', 'none'][+pd.isLoggedUsser]
+    pd.photoUpload.display = pd.bioInput.style.display = ['none', 'block'][+pd.isLoggedUsser]
 
     //#region CHANGE-PP
-    if (loggedUser && profileData.name == loggedUser.username) {
-        profileData.bio.style.display = 'none'
-        profileData.bioInput.style.display = 'block'
+    if (pd.isLoggedUsser) {
         var uploadPp = async (state) => {
             if (state) {
                 imageCrop.ratio2 = Math.max(imageCrop.img.sizeX, imageCrop.img.sizeY) / imageCrop.len / imageCrop.img.scale
@@ -83,7 +113,7 @@
                 imageCrop.context.clearRect(0, 0, imageCrop.canvas.width, imageCrop.canvas.height)
                 imageCrop.input.style.display = by.selector('#image-crop > div > div').style.display = imageCrop.frames[1].style.display = imageCrop.frames[0].style.border = 'none'
                 upload(imageCrop.data, '', 'usercontent-avatar').then(([json, ok]) => {
-                    if (ok) { loggedUser.avatarUrl = cdnUrl + json; localStorage.setItem('loggedUser', JSON.stringify(loggedUser)); logged(true) }
+                    if (ok) { loggedUser.avatarUrl = cdnUrl + json; logged(true) }
                     else alert.error(json); redirect(pathname[0])
                 })
             }

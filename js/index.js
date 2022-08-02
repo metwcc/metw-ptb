@@ -1,7 +1,8 @@
 ﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://cdn.metw.cc/', url = window.location.origin + '/'
 var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
-var token, isLogged = false, loggedUser
+var token, isLogged = false, loggedUserData = {}
+var loggedUser = new Proxy(loggedUserData, { set: function (target, key, value) { target[key] = value; localStorage.loggedUser = JSON.stringify(loggedUserData); return true } })
 
 
 //#region GENERAL PURPOSE FUNCTIONS
@@ -18,8 +19,6 @@ const clearListeners = selector => {
 }
 const loader = state => by.id('loader').style.display = ['none', 'flex'][+state] 
 const customInput = ({ srcElement }, length, regex) => { if (srcElement && srcElement.value) srcElement.value = srcElement.value.replace(regex ? regex : '', '').substring(0, length) }
-alert.error = error => alert(typeof error == 'object' ? error[0] : error) //reserved for future usage
-alert.success = text => alert(text) //reserved for future usage
 const fetchJSON = (input, ...init) => {
     var ok, conf = { showLoader: !!init.find(v => typeof v === 'boolean'), fetchInit: init.find(v => typeof v != 'boolean') }; if (conf.showLoader) loader(true);
     if (conf.fetchInit && conf.fetchInit.method && conf.fetchInit.method.toLowerCase() == 'post' && conf.fetchInit.body && Object.getPrototypeOf(conf.fetchInit.body).toString() != '[object FormData]' )
@@ -55,6 +54,8 @@ const upload = async (data, name, type) => {
 }
 const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `usercontent/${id}/${avatar}` : `avatars/default${avatar}`)
 const getFlag = (num, flag) => ((num >> ['staff', 'mod', 'partner', 'bugHunter', 'premium'].indexOf(flag)) % 2 != 0)
+alert.error = error => alert(typeof error == 'object' ? error[0] : error) //reserved for future usage
+alert.success = text => alert(text) //reserved for future usage
 //#endregion
 
 
@@ -115,10 +116,12 @@ function logged(state) {
     for (element of by.class('non-logged')) element.style.display = ['', 'none'][+state]
     localStorage.setItem('logged', state)
     if (state) {
-        loggedUser = JSON.parse(localStorage.getItem('loggedUser'))
         token = localStorage.getItem('token')
-        by.id('logged-user-username').innerText = loggedUser.username
-        by.id('logged-user-profile-photo').src = loggedUser.avatarUrl
+        if (localStorage.loggedUser) Object.assign(loggedUser, JSON.parse(localStorage.loggedUser))
+        if (loggedUser) {
+            if (loggedUser.username) by.id('logged-user-username').innerText = loggedUser.username
+            if (loggedUser.avatarUrl) by.id('logged-user-profile-photo').src = loggedUser.avatarUrl
+        }
     }
     else localStorage.removeItem('token')
 }
@@ -127,17 +130,21 @@ function session(detailed) {
     token = localStorage.getItem('token'); if (!token) return
     return new Promise(async resolve => {
         var [json, ok] = await fetchJSON(backEndUrl + 'session', { headers: { auth: token } })
-        if (ok) resolve(detailed ?
-            (async () => {
-                var [details, ok2] = await fetchJSON(backEndUrl + `users/:${json.id}`)
-                loggedUser = details, loggedUser.avatarUrl = avatarUrl(details.id, details.avatar)
-                localStorage.setItem('loggedUser', JSON.stringify(details)); logged(true); return details
-            })() : json)
+        if (ok) {
+            Object.assign(loggedUser, json); logged(true)
+            resolve(detailed ?
+                (async () => {
+                    var [details, ok2] = await fetchJSON(backEndUrl + `users/:${json.id}`)
+                    Object.assign(loggedUser, details); loggedUser.avatarUrl = avatarUrl(details.id, details.avatar)
+                    logged(true); return details
+                })() : json)
+        }
         else logged(false)
     })
 }
 //#endregion
 
-window.onpopstate = loadPage; session(true)
-logged(localStorage.getItem('logged') == 'true'); loadPage(); loader(false)
+
+logged(localStorage.getItem('logged') == 'true')
+window.onpopstate = loadPage; session(true); loadPage(); loader(false)
 if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/serviceWorker.js') }) }

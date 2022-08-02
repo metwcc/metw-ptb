@@ -8,10 +8,10 @@
 .center { transform: translate(-50%, -50%); }
 
 .href { color: var(--link-color); text-decoration: underline; cursor: pointer }
-.icon svg, .icon img  { display: inline-flex; align-self: center; height: 1em; width: 1em; top: .2em; position: relative}
+.icon svg, .icon img  { display: inline-flex; align-self: center; height: 1.25em; width: 1.2em; top: .25em; position: relative }
 body { background-color: var(--background-color-ground); overflow: hidden }
 
-input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s }
+input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s; cursor: pointer }
 input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background-color-3rd) inset !important; -webkit-text-fill-color: var(--color); }
 
 .top { background-color: var(--background-color-top-ground); z-index: 10; display: none; top: 0; position: absolute; user-select: none }
@@ -27,10 +27,10 @@ input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background
 .app { background-color: var(--background-color-1st); max-width: 1600px}
 .app > main { height: calc(100% - 60px); background-color: var(--background-color-2nd); border: none; padding: 30px }
 
-.app > nav { height: 60px; background-color: inherit; padding: 10px; padding-left: 20px; padding-right: 20px; user-select: none; transition: 0.3s  }
+.app > nav { height: 60px; background-color: inherit; padding: 10px; padding-left: 20px; padding-right: 20px; user-select: none; transition: 0.3s }
 .app > nav > div:first-of-type { cursor: pointer; line-height: 40px; font-size: 28px; transition: 0.3s }
 .app > nav > div { display: inline-block }
-#title-buttons { float: right; font-size: 19px; margin-top: 8px; display: inline; text-align: center }
+#title-buttons { float: right; font-size: 19px; margin-top: 4px; display: inline; text-align: center }
 #title-buttons > *, #title-buttons > ul > * {  padding: 10px; transition: 0.3s; cursor: pointer; border-radius: 10px; list-style-type: none; display: inline }
 #title-buttons > a:hover, #title-buttons > ul > li:hover { background-color: var(--background-color-4th) }
 #logged-user-profile-photo { border-radius: 5px }
