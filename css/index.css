@@ -9,7 +9,7 @@
 
 .href { color: var(--link-color); text-decoration: underline; cursor: pointer }
 .icon svg, .icon img  { display: inline-flex; align-self: center; height: 1em; width: 1em; top: .2em; position: relative}
-body { background-color: var(--background-color-ground) }
+body { background-color: var(--background-color-ground); overflow: hidden }
 
 input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s }
 input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background-color-3rd) inset !important; -webkit-text-fill-color: var(--color); }
