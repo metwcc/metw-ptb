@@ -8,12 +8,12 @@
         <input onfocusout="updateBio(event)" oninput="customInput(event, 255, /[^\s\S]/g)" />
         <p></p>
     </div>
-    <div class="center-y">
+    <div>
         <button class="icon" onclick="follow()">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H13.77a1.15,1.15,0,1,0,0,2.29h5.08a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path class="cls-1" d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H17.46V5a1.15,1.15,0,0,0-2.3,0V6.41H13.77a1.15,1.15,0,1,0,0,2.29h1.39v1.37a1.15,1.15,0,0,0,2.3,0V8.7h1.39a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg>
             <span>takip et</span>
         </button>
-        <span></span> takip
+        <br /><span></span> takip
         <br /><span></span> takipçi
     </div>
 </div>
@@ -32,15 +32,21 @@
 <style>
     .profile { background-color: var(--background-color-1st); padding: 10px; height: 150px; transform: translate(-30px, -30px); width: calc(100% + 60px); box-shadow: 0px 1px 1px var(--background-color-top-1st) inset }
     .profile > div { display: inline-block; position: absolute }
-    .profile > div:first-of-type { padding: 15px 20px;  height: 120px }
+    .profile > div:first-of-type { padding: 15px 20px; height: 120px }
     .profile > div:first-of-type > * { display: inline-block; height: 100px; position: absolute; border-radius: 10px }
     .profile > div:nth-of-type(2) { margin-left: 150px; width: calc(100% - 190px) }
     .profile > div:nth-of-type(2) > h1 { margin: 0 }
     .profile > div:nth-of-type(2) > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
-    .profile > div:nth-of-type(2) > p { width: calc(100% - 160px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
-    .profile > div:last-of-type { font-size: 100%; right: 10px }
+    .profile > div:nth-of-type(2) > p { width: calc(100% - 10px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
+    .profile > div:last-of-type { font-size: 100%; right: 10px; top: 50%; transform: translateY(-50%) }
     .profile > div:last-of-type > button { background-color: #1EB955; display: none }
     .profile > div:last-of-type > svg { display: none }
+    
+    @media (max-width:800px) {
+        .profile { height: 180px }
+        .profile > div:last-of-type > br { display: none }
+        .profile > div:last-of-type { left: 30px; top: unset; bottom: 5px; transform: translateY(calc(10% - 10px)) }
+    }
 
     #upload-pp { width: 100px; height: 100px; display: inline-block; position: absolute; opacity: 0; transition: 0.1s }
     #upload-pp:hover { opacity: 1 }
@@ -76,7 +82,7 @@
             pd.unfollowSvg.style.display = ['none', 'inline-block'][+json.followed_by_you], pd.followSvg.style.display = ['inline-block', 'none'][+json.followed_by_you]
             by.selector('.profile > div:last-of-type > button > span').innerText = ['takip et', 'takipten çık'][+json.followed_by_you]
             pd.followButton.style.backgroundColor = ['#1EB955', 'red'][+json.followed_by_you]
-            pd.followButton.style.display = ['block', 'none'][+(pd.isLoggedUsser || !loggedUser.id)]
+            pd.followButton.style.display = ['inline-block', 'none'][+(pd.isLoggedUsser || !loggedUser.id)]
             pd.profile = json
             if (getFlag(json.flags, 'mod')) pd.bio.innerHTML = json.bio
             pd.div.style.paddingTop = (120 - pd.div.clientHeight) / 2
