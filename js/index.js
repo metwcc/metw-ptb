@@ -3,7 +3,7 @@ var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
 var token, isLogged = false, loggedUserData = {}
 var loggedUser = new Proxy(loggedUserData, { set: function (target, key, value) { target[key] = value; localStorage.loggedUser = JSON.stringify(loggedUserData); return true } })
-
+var flags = { user: ['staff', 'mod', 'partner', 'bugHunter', 'premium', 'beta'] }
 
 //#region GENERAL PURPOSE FUNCTIONS
 const by = {
@@ -52,8 +52,8 @@ const upload = async (data, name, type) => {
         } else resolve([json, ok])
     })
 }
-const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `usercontent/${id}/${avatar}` : `avatars/default${avatar}`)
-const getFlag = (num, flag) => ((num >> ['staff', 'mod', 'partner', 'bugHunter', 'premium'].indexOf(flag)) % 2 != 0)
+const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `usercontent/${id}/${avatar}` : `assets/avatars/${avatar}`)
+const getFlag = (num, flag) => ((num >> flags.user.indexOf(flag)) % 2 != 0)
 alert.error = error => alert(typeof error == 'object' ? error[0] : error) //reserved for future usage
 alert.success = text => alert(text) //reserved for future usage
 //#endregion

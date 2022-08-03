@@ -2,13 +2,14 @@
 
 .full-x, .full-size { width: 100%; }
 .full-y, .full-size { height: 100%; }
+.fill-currentColor { fill: currentColor }
 
 .center-x, .center { left: 50%; transform: translateX(-50%); position: absolute }
 .center-y, .center { top: 50%; transform: translateY(-50%); position: absolute }
 .center { transform: translate(-50%, -50%); }
 
 .href { color: var(--link-color); text-decoration: underline; cursor: pointer }
-.icon svg, .icon img  { display: inline-flex; align-self: center; height: 1.25em; width: 1.2em; top: .25em; position: relative }
+.icon svg, .icon img, .icon object { display: inline-flex; align-self: center; height: 1.25em; width: 1.2em; top: .25em; position: relative }
 body { background-color: var(--background-color-ground); overflow: hidden }
 
 input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s; cursor: pointer }
