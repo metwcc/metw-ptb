@@ -218,7 +218,7 @@
     }
     pd.followList.f = (t) => {
         if (!pd.profile.data) return
-        pd.followList.children[0].innerText = `@metw${(getFlag(pd.profile.data.flags, 'mod') ? '*' : '')} kullanıcısının ${t == 'followings' ? 'takipleri' : 'takipçileri'}`
+        pd.followList.children[0].innerText = `@${pd.profile.data.username}${(getFlag(pd.profile.data.flags, 'mod') ? '*' : '')} kullanıcısının ${t == 'followings' ? 'takipleri' : 'takipçileri'}`
         pd.followList.children[1].innerHTML = ''
         pd.followList.children[2].style.display = 'none'
         pd.followList.children[2].onclick = () => ((t) => { pd.followList.page++; pd.followList.renderPage(t) })(t)
