@@ -117,7 +117,7 @@ function renderPage(name) {
         iframe.innerHTML = pageData[name]; let scriptElement = document.createElement('script'); scriptElement.innerHTML = scripts; iframe.appendChild(scriptElement)
     } else { loader(true); fetch(`/pages/${name}.html`).then(function (response) { response.text().then(function (text) { pageData[name] = text; loader(false); renderPage(name) }) }); }
 }
-const redirect = (path, title) => { window.history.pushState(null, title, path); document.title = (title ? (title == '404' ? 'Sayfa Bulunamadı' : title) + ' • metw.cc' : 'metw.cc'); loadPage() }
+const redirect = (path, title) => { window.history.pushState(null, title, path); gtag('set', 'page_path', path); gtag('event', 'page_view'); document.title = (title ? (title == '404' ? 'Sayfa Bulunamadı' : title) + ' • metw.cc' : 'metw.cc'); loadPage() }
 async function loadPage() {
     [pathname, search] = formatUri()
     if (pathname.length == 0) { renderPage('homepage'); return }
