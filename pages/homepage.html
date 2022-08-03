@@ -1,1 +1,50 @@
-﻿dünaynın en iyi web sitesi, metw.cc
+﻿<div id="homepage">
+    <div class="full-size">
+        <ul></ul>
+        <ul></ul>
+        <br />
+    </div>
+</div>
+<style>
+    #homepage > div { overflow-y: auto; position: absolute; transform: translate(-30px, -30px); height: calc(100% - 60px) }
+    #homepage > div > ul { width: calc(100% - 60px); max-width: 700px; transform: translateX(calc(50vw - 50% - 30px)); margin: 20px 0 10px 0 }
+    #homepage > div > ul:first-of-type { max-width: 1400px }
+    #homepage > div > ul:first-of-type > li { list-style-type: none; width: calc(33% - 10px); margin: 5px; display: inline-block; background-color: var(--background-color-3rd); padding: 15px; border-radius: 10px; font-size: 20px; cursor: pointer }
+    #homepage > div > ul:first-of-type > li > a { margin-left: 10px }
+    #homepage > div > ul:first-of-type > li > img { border-radius: 5px }
+    #homepage > div > ul:last-of-type { max-width: 700px }
+    #homepage > div > ul:last-of-type > li { list-style-type: none; width: 100%; background-color: var(--background-color-3rd); margin: 10px 0; padding: 10px; border-radius: 10px; display: block; padding: 15px 45px }
+    #homepage > div > ul:last-of-type > li > hr { border: 1px solid var(--background-color-4th) }
+    #homepage > div > ul:last-of-type> li > span { font-size: 18px }
+    #homepage > div > ul:last-of-type > li > span > img { border-radius: 5px }
+
+    @media (max-width: 800px) {  
+        #homepage > div { height: calc(100% - 90px) }
+    }
+    @media (max-width: 1200px) {
+        #homepage > div > ul:first-of-type > li { width: calc(50% - 15px) }
+    }
+</style>
+<script>
+    var hp = Object.assign(by.id('homepage'), {
+        posts: by.selector('#homepage > div > ul:last-of-type'),
+        users: by.selector('#homepage > div > ul:first-of-type')
+    })
+    fetchJSON(backEndUrl + 'homepage', true).then(async ([json, ok]) => {
+        if (ok) {
+            var users = json.posts.map(i => i.sender_id).concat(json.users), clearedUsers = []
+            users.map(i => !clearedUsers.includes(i) ? clearedUsers.push(i) : '')
+            await getUsers(json.users); users = (await getUsers(json.users))
+            for (let post of json.posts) hp.posts.appendChild(postElement(await getUsers([post.sender_id]), post))
+            for (let username of Object.keys(users)) {
+                let user = users[username]
+                let userElem = document.createElement('li'); userElem.className = 'icon'
+                userElem.img = document.createElement('img'), userElem.img.src = avatarUrl(user.id, user.avatar)
+                userElem.a = document.createElement('a'), userElem.a.innerText = `@${username}${getFlag(user.flags, 'mod') ? '*' : ''}`
+                userElem.appendChild(userElem.img); userElem.appendChild(userElem.a)
+                userElem.onclick = () => redirect(`/@${username}`, username)
+                hp.users.appendChild(userElem)
+            }
+        }
+    })
+</script>

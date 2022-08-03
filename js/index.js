@@ -1,9 +1,10 @@
-﻿const backEndUrl = 'https://api.metw.cc/ptb/', cdnUrl = 'https://cdn.metw.cc/', url = window.location.origin + '/'
+﻿const backEndUrl = 'http://api.metw/utb/', cdnUrl = 'https://cdn.metw.cc/utb/', url = window.location.origin + '/'
 var iframe = document.getElementById('main')
 var pageData = {}, pathname, search
 var token, isLogged = false, loggedUserData = {}
 var loggedUser = new Proxy(loggedUserData, { set: function (target, key, value) { target[key] = value; localStorage.loggedUser = JSON.stringify(loggedUserData); return true } })
 var flags = { user: ['staff', 'mod', 'partner', 'bugHunter', 'premium', 'beta'] }
+var indexedUsers = {}
 
 //#region GENERAL PURPOSE FUNCTIONS
 const by = {
@@ -54,6 +55,31 @@ const upload = async (data, name, type) => {
 }
 const avatarUrl = (id, avatar) => cdnUrl + (avatar.length > 3 ? `usercontent/${id}/${avatar}` : `assets/avatars/${avatar}`)
 const getFlag = (num, flag) => ((num >> flags.user.indexOf(flag)) % 2 != 0)
+const getUsers = async selectors => {
+    var response = {}, usersToFetch = []
+    for (selector of selectors) {
+        switch (typeof selector) {
+            case 'number': if ((() => { for (let key of Object.keys(indexedUsers)) if (indexedUsers[key].id == selector) { response[key] = indexedUsers[key]; return true } })()) break; usersToFetch.push(selector); break
+            case 'string': a = Object.keys(indexedUsers).includes(selectors) ? usersToFetch.push(selector) : response[selector] = indexedUsers[selector]; break
+        }
+    }
+    if (usersToFetch.length) {
+        var [json, ok] = await fetchJSON(backEndUrl + 'users/profiles?username&avatar&id&flags', { method: 'post', body: usersToFetch }), newData = {}
+        Object.keys(json).map(key => newData[json[key].username] = { id: json[key].id, avatar: json[key].avatar, flags: json[key].flags })
+        Object.assign(indexedUsers, newData); Object.assign(response, newData)
+    }
+    return response
+}
+const postElement = (user, post) => {
+    if (!user.username) var user = { username: Object.keys(user)[0], ...user[Object.keys(user)[0]] }
+    let postElem = document.createElement('li')
+    postElem.user = document.createElement('span'), postElem.user.innerHTML = `<img src="${avatarUrl(user.id, user.avatar)}"> @${user.username}${getFlag(user.flags, 'mod') ? '*' : ''}`; postElem.user.className = 'icon'
+    postElem.hr = document.createElement('hr')
+    postElem.content = document.createElement('p'); postElem.content.innerText = post.content
+    postElem.user.onclick = () => redirect(`/@${user.username}`, user.username)
+    postElem.appendChild(postElem.user); postElem.appendChild(postElem.hr); postElem.appendChild(postElem.content)
+    return postElem
+}
 alert.error = error => alert(typeof error == 'object' ? error[0] : error) //reserved for future usage
 alert.success = text => alert(text) //reserved for future usage
 //#endregion
