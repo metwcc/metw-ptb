@@ -17,7 +17,8 @@
         <br /><a><span></span> takipçi</a>
     </div>
 </div>
-<div class="follow-list full-x">
+<div class="follow-list">
+    <b>✕</b>
     <a></a>
     <ul>
     </ul>
@@ -33,44 +34,41 @@
             <button onclick="redirect(pathname[0])">iptal</button>
         </div>
     </div>
-</div>    
+</div>
+<div class="user-content">
+    <ul>
 
+    </ul>
+    <b>+</b>
+</div>
 <style>
     .profile { background-color: var(--background-color-1st); padding: 10px; height: 150px; transform: translate(-30px, -30px); width: calc(100% + 60px); box-shadow: 0px 1px 1px var(--background-color-top-1st) inset }
     .profile > div { display: inline-block; position: absolute }
     .profile > div:first-of-type { padding: 15px 20px; height: 120px }
     .profile > div:first-of-type > * { display: inline-block; height: 100px; position: absolute; border-radius: 10px }
-    
     .profile > div:nth-of-type(2) { margin-left: 150px; width: calc(100% - 190px) }
     .profile > div:nth-of-type(2) > h1 { margin: 0 }
     .profile > div:nth-of-type(2) > h1 > img { height: 1em; top: .2em; left: -.02em }
     .profile > div:nth-of-type(2) > h1 > img:first-of-type { left: .2em }
     .profile > div:nth-of-type(2) > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
     .profile > div:nth-of-type(2) > p { width: calc(100% - 130px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
-    
     .profile > div:last-of-type { font-size: 100%; right: 10px; top: 50%; transform: translateY(-50%); display: none }
     .profile > div:last-of-type > a { cursor: pointer }
     .profile > div:last-of-type > button { background-color: #1EB955; display: none }
     .profile > div:last-of-type > svg { display: none }
 
-    .follow-list { background: var(--background-color-1st); height: calc(100% - 150px); border-radius: 10px; display: none; overflow: hidden auto }
-    .follow-list > a:first-of-type { padding: 20px 20px 0 20px; display: block; font-size: 20px }
+    .follow-list { background: var(--background-color-1st); height: calc(100% - 270px); width: calc(100% - 60px); border-radius: 10px; display: none; overflow: hidden auto; z-index: 2; position: absolute }
+    .follow-list > a:first-of-type { padding: 20px 20px 10px 20px; display: inline-block; font-size: 22px; float: left; width: calc(100% - 70px) }
     .follow-list > ul { margin: 0; padding: 10px 10px }
     .follow-list > ul > li { display: inline-block; list-style-type: none; margin: 10px; height: 60px; background-color: var(--background-color-2nd); border-radius: 10px; padding: 10px; width: calc(50% - 20px); overflow: hidden; white-space: nowrap; cursor: pointer; user-select: none }
     .follow-list > ul > li > * { display: inline-block; float: left }
     .follow-list > ul > li > img { height: 40px; border-radius: 5px }
     .follow-list > ul > li > span { line-height: 40px; font-size: 30px; margin-left: 10px; width: calc(100% - 100px) }
     .follow-list > a:last-of-type { margin: 0 20px; color: var(--link-color); text-decoration: underline; display: none }
+    .follow-list > b { display: inline-block; float: right; background-color: red; margin: 20px 20px 0 0; width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 5px; cursor: pointer; user-select: none }
 
-    @media (max-width:800px) {
-        .profile { height: 180px }
-        .profile > div:nth-of-type(2) > p { width: calc(100% - 10px) }
-        .profile > div:last-of-type > br { display: none }
-        .profile > div:last-of-type { left: 30px; top: unset; bottom: 5px; transform: translateY(calc(10% - 10px)) }
-        
-        .follow-list { height: calc(100% - 180px) }
-        .follow-list > ul > li { width: calc(100% - 10px) }
-    }
+    .user-content > b { position: absolute; bottom: 30px; right: 30px; width: 30px; height: 30px; background-color: var(--background-color-3rd); border-radius: 50%; text-align: center; line-height: 30px; font-size: 20px; cursor: pointer; user-select: none }
+
 
     #upload-pp { width: 100px; height: 100px; display: inline-block; position: absolute; opacity: 0; transition: 0.1s }
     #upload-pp:hover { opacity: 1 }
@@ -85,6 +83,16 @@
     #image-crop > div > span:first-of-type { border: 3px dashed var(--color); border-radius: 10px; outline: calc(100vw) solid rgba(0 0 0 / 0.5) }
     #image-crop > div > span:last-of-type { border: 2px solid var(--color); border-radius: 50% }
     #image-crop > div > div > button { background-color: var(--background-color-top-2nd); border: 5px solid var(--background-color-top-1st); font-size: 120%; z-index: 2 }
+
+    @media (max-width: 800px) {
+        .profile { height: 180px }
+        .profile > div:nth-of-type(2) > p { width: calc(100% - 10px) }
+        .profile > div:last-of-type > br { display: none }
+        .profile > div:last-of-type { left: 30px; top: unset; bottom: 5px; transform: translateY(calc(10% - 10px)) }
+        
+        .follow-list { height: calc(100% - 330px) }
+        .follow-list > ul > li { width: calc(100% - 10px) }
+    }
 </style>
 <script>
     var pd = {
@@ -207,24 +215,25 @@
     //followings - followers page
     pd.followList.renderPage = async (t) => {
         var ids = (await fetchJSON(backEndUrl + `users/${pd.profile.data.id}/${t}?offset=${pd.followList.page * 10}`, true))[0].reverse()
-        if (pd.followList[t].length < Math.min(pd.followList.page * 10 + 10, pd.profile.data[t])) pd.followList[t].push(...(await fetchJSON(backEndUrl + 'users/profiles?username&avatar', { method: 'post', body: ids }))[0].map((v, i) => { v.id = ids[i]; return v }))
-        pd.followList.children[2].style.display = ['none', 'block'][+(pd.followList.page * 10 + 10 < pd.profile.data[t])]
-        for (let user of pd.followList[t].slice(pd.followList.page * 10, pd.followList.page * 10 + 10)) {
+        if (pd.followList[t].length < Math.min(pd.followList.page * 10 + 10, pd.profile.data[t])) pd.followList[t].push(...(await fetchJSON(backEndUrl + 'users/profiles?username&avatar&id', { method: 'post', body: ids }))[0])
+        pd.followList.children[3].style.display = ['none', 'block'][+(pd.followList.page * 10 + 10 < pd.profile.data[t])]
+        for (let user of pd.followList[t].slice(pd.followList.page * 10, pd.followList.page * 10 + 10).reverse()) {
             let userElem = document.createElement('li')
-            userElem.onclick = ({ target: { innerHTML } }) => redirect(`@${user.username}`, user.username)
+            userElem.onclick = () => redirect(`@${user.username}`, user.username)
             userElem.innerHTML = `<img src="${avatarUrl(user.id, user.avatar)}"><span>@${user.username}</span>`
-            pd.followList.children[1].appendChild(userElem)
+            pd.followList.children[2].appendChild(userElem)
         }
     }
-    pd.followList.f = (t) => {
+    pd.followList.f = async (t) => {
         if (!pd.profile.data) return
-        pd.followList.children[0].innerText = `@${pd.profile.data.username}${(getFlag(pd.profile.data.flags, 'mod') ? '*' : '')} kullanıcısının ${t == 'followings' ? 'takipleri' : 'takipçileri'}`
-        pd.followList.children[1].innerHTML = ''
-        pd.followList.children[2].style.display = 'none'
-        pd.followList.children[2].onclick = () => ((t) => { pd.followList.page++; pd.followList.renderPage(t) })(t)
-        pd.followList.style.display = 'block'
+        pd.followList.children[1].innerText = `@${pd.profile.data.username}${(getFlag(pd.profile.data.flags, 'mod') ? '*' : '')} kullanıcısının ${t == 'followings' ? 'takipleri' : 'takipçileri'}`
+        pd.followList.children[2].innerHTML = ''
+        pd.followList.children[3].style.display = 'none'
+        pd.followList.children[3].onclick = () => ((t) => { pd.followList.page++; pd.followList.renderPage(t) })(t)
         pd.followList.page = 0; pd.followList.renderPage(t)
+        pd.followList.style.display = 'block'
     }
+    pd.followList.children[0].onclick = () => pd.followList.style.display = 'none'
 
     pd.profile.followings.parentElement.onclick = () => pd.followList.f('followings')
     pd.profile.followers.parentElement.onclick = () => pd.followList.f('followers')
