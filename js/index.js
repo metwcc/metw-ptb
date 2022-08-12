@@ -1,4 +1,4 @@
-﻿const url = { backend: 'http://api.metw/utb/', cdn: 'https://cdn.metw.cc/utb/' }
+﻿const url = { backend: 'http://api.metw.cc/ptb/', cdn: 'https://cdn.metw.cc/' }
 const d = document, w = window
 const pageData = {}
 var pathname, search
