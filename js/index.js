@@ -1,4 +1,4 @@
-﻿const url = { backend: 'http://api.metw.cc/ptb/', cdn: 'https://cdn.metw.cc/' }
+﻿const url = { backend: 'https://api.metw.cc/ptb/', cdn: 'https://cdn.metw.cc/' }
 const d = document, w = window
 const pageData = {}
 var pathname, search
@@ -245,7 +245,7 @@ w.onresize = () => {
 w.onpopstate = () => uri.load()
 w.onload = (async () => {
     token = localStorage.getItem('token')
-    metw.errorHandler = () => window.location.replace('/hata')
+    metw.errorHandler = () => true //window.location.replace('/hata')
     if (token) login()
     else logout()
     await uri.load()
