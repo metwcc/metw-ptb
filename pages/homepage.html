@@ -49,12 +49,12 @@
     if (p.posts && p.posts.length) {
         p.querySelector('.p .quiet').remove()
         for (post of p.posts) p.list.appendChild(metw.gui.post(post))
-        if (!!(p.posts.length % 20) || !p.posts.length) p.loadMore.remove()
+        if (!!(p.posts.length % 20)) p.loadMore.remove()
         p.loadMore.onclick = async () => {
             if (!!(p.posts.length % 20)) p.loadMore.remove()
             var posts = await p.render(p.posts.length)
             for (let post of posts) p.list.appendChild(metw.gui.post(post))
             p.posts.push(...posts)
         }
-    }
+    } else p.loadMore.remove()
 </script>
