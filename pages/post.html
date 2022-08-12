@@ -1,0 +1,19 @@
+﻿<script init>
+    p.post = await session.getPost(pathname[1])
+    p.comments = await metw.gui.comments(p.post, p.post, p.post.indexed)
+    resolve()
+</script>
+
+<body>
+    <ul class="posts-list">
+    </ul>
+</body>
+
+<style>
+    .p { max-width: 700px }
+</style>
+
+<script>
+    p.querySelector('.posts-list').appendChild(metw.gui.post(p.post))
+    p.appendChild(p.comments)
+</script>

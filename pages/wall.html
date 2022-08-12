@@ -1,0 +1,33 @@
+﻿<script init>
+    p.username = pathname[0].substring(1)
+    p.user = await session.getUser(p.username, true)
+    p.isLoggedUser = session.user && p.user.username == session.user.username
+    p.comments = await metw.gui.comments(p.user, p.user._profile, p.user.indexed)
+    resolve()
+</script>
+
+<body>
+    <div class="mini-profile" onclick="redirect('/' + pathname[0])">
+        <img class="bd" /><h1><span></span></h1>
+    </div>
+</body>
+
+<style>
+    .p { max-width: 700px }
+    
+    .p .mini-profile { display: flex; align-items: center; cursor: pointer }
+    .p .mini-profile img { height: 48px; border-radius: 50%; border-width: 3px; margin: 0 10px }
+    .p .mini-profile h1 { font-size: 1.75em; margin: 0 }-
+</style>
+
+<script>
+    Object.assign(p, {
+        profile: Object.assign(p.querySelector('.mini-profile'), {
+            pp: p.querySelector('.mini-profile img'),
+            username: p.querySelector('.mini-profile h1 span')
+        })
+    })
+    p.profile.username.innerText = p.user.fullUsername
+    p.profile.pp.src = p.user.profile.avatarURL
+    p.appendChild(p.comments)
+</script>

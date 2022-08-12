@@ -1,307 +1,273 @@
-﻿<div class="profile-page full-size">
-    <div class="profile full-x">
+﻿<script init>
+    p.username = pathname[0].substring(1)
+    p.user = await session.getUser(p.username, true)
+    p.isLoggedUser = session.user && p.user.username == session.user.username
+    await p.user.getPosts(0)
+    resolve()
+</script>
+
+<body>
+    <div class="profile x-full bg-1 bd">
         <div>
-            <img />
-            <div id="upload-pp" onclick="uploadPp()"> <button classs="center-x">değiştir</button> </div>
-        </div>
-        <div>
-            <h1 class="icon">@<span></span></h1>
-            <input oninput="customInput(event, 255, /[^\s\S]/g)" />
-            <p></p>
-        </div>
-        <div>
-            <button class="icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H13.77a1.15,1.15,0,1,0,0,2.29h5.08a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path class="cls-1" d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H17.46V5a1.15,1.15,0,0,0-2.3,0V6.41H13.77a1.15,1.15,0,1,0,0,2.29h1.39v1.37a1.15,1.15,0,0,0,2.3,0V8.7h1.39a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z" /></svg>
-                <span>takip et</span>
-            </button>
-            <br /><a><span></span> takip</a>
-            <br /><a><span></span> takipçi</a>
-        </div>
-    </div>
-    <div class="follow-list">
-        <b>✕</b>
-        <a></a>
-        <ul>
-        </ul>
-        <a class="href">devamını yükle</a><br />
-    </div>
-    <div class="full-size top" id="image-crop" style="display: none">
-        <div class="center">
-            <img class="center" />
-            <span class="center"></span><span class="center"></span>
-            <input class="center-x" type="range">
-            <div class="center-x">
-                <button onclick="uploadPp(true)">onayla</button>
-                <button onclick="redirect(pathname[0])">iptal</button>
+            <div class="banner"> </div>
+            <div>
+                <div class="user">
+                    <div class="pp-div">
+                        <img class="pp bd" />
+                        <div class="change-pp"><span class="bd bg-1">değiştir</span></div>
+                    </div>
+                    <div class="details">
+                        <h1 class="username"></h1>
+                        <div>
+                            <span class="bio"></span>
+                            <textarea class="bio-input bd" placeholder="yazmaya başla..."></textarea>
+                        </div>
+                    </div>
+                    <div class="following">
+                        <ul>
+                            <li>
+                                <button class="icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="display: inline-block"><path d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H13.77a1.15,1.15,0,1,0,0,2.29h5.08a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z"></path></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="display: inline-block"><path d="M7.43,7.68A3.84,3.84,0,1,0,3.59,3.84,3.84,3.84,0,0,0,7.43,7.68ZM18.85,6.41H17.46V5a1.15,1.15,0,0,0-2.3,0V6.41H13.77a1.15,1.15,0,1,0,0,2.29h1.39v1.37a1.15,1.15,0,0,0,2.3,0V8.7h1.39a1.15,1.15,0,1,0,0-2.29ZM7.43,9.83A7.43,7.43,0,0,0,0,17.26H14.86A7.42,7.42,0,0,0,7.43,9.83Z"></path></svg>
+                                    <span>takip et</span>
+                                </button>
+                            </li>
+                            <li class="followings"><span class="following-count">0</span> takip</li>
+                            <li class="followers"><span class="follower-count">0</span> takipçi</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="icon" onclick="redirect(`/@${p.username}/duvar`)">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path><path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path></svg>&nbsp;duvar&nbsp;</button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="usercontent">
-        <div>
-            <ul></ul>
-            <a class="href">devamını yükle</a><br />
+    <div class="content">
+        <div class="following-list bg-1 bd">
+            <div><span><span class="username"></span> kullanıcısının <span class="label"></span></span><button>&nbsp;&lt;&nbsp;</button></div>
+            <ul> </ul>
+            <button>devamını yükle</button>
+        </div>
+        <div class="posts-profile">
+            <ul class="page-no"> </ul>
+            <ul class="posts-list"> </ul><br />
         </div>
     </div>
-    <div class="full-size top" id="compose">
-        <div class="center">
-            <textarea placeholder="yazmaya başla..."></textarea>
-            <span>gönder</span> <span>iptal</span>
-        </div>
-    </div>
-</div>
-<b id="compose-button">+</b>
+</body>
+
 <style>
-    .profile-page { overflow-y: auto; overflow-x: hidden; height: calc(100% - 60px); left: 0; position: absolute; padding: 30px; transform: translateY(-30px) }
+    .p > .profile { border-radius: 10px; overflow: hidden  }
+    .p > .profile > div { height: 170px; border-radius: 10px; display: grid }
+    .p > .profile > div > * { grid-row: 1; grid-column: 1 }
+    .p > .profile > div > .banner { opacity: 0.2; width: 100%; background: no-repeat center center; background-size: cover }
+    .p > .profile > div > div:last-of-type { padding: 10px; z-index: 2 }
+    .p > .profile .user { display: flex; height: 100px; align-items: center }
 
-    .profile { background-color: var(--background-color-1st); padding: 10px; height: 150px; transform: translate(-30px, -30px); width: calc(100% + 60px); box-shadow: 0px 1px 1px var(--background-color-top-1st) inset }
-    .profile > div { display: inline-block; position: absolute }
-    .profile > div:first-of-type { padding: 15px 20px; height: 120px }
-    .profile > div:first-of-type > * { display: inline-block; height: 100px; position: absolute; border-radius: 10px }
-    .profile > div:nth-of-type(2) { margin-left: 150px; width: calc(100% - 190px) }
-    .profile > div:nth-of-type(2) > h1 { margin: 0 }
-    .profile > div:nth-of-type(2) > h1 > img { height: 1em; top: .2em; left: -.02em }
-    .profile > div:nth-of-type(2) > h1 > img:first-of-type { left: .2em }
-    .profile > div:nth-of-type(2) > input { border: 3px dotted var(--background-color-2nd); width: 50%; display: none }
-    .profile > div:nth-of-type(2) > p { width: calc(100% - 130px); text-wrap: normal; margin: 0; max-height: 80px; overflow-y: auto }
-    .profile > div:last-of-type { font-size: 100%; right: 10px; top: 50%; transform: translateY(-50%); display: none }
-    .profile > div:last-of-type > a { cursor: pointer }
-    .profile > div:last-of-type > button { background-color: #1EB955; display: none }
-    .profile > div:last-of-type > svg { display: none }
+    /* #region PROFILE */
+    .p > .profile .user > * { display: inline-block; height: 100px; width: 100% }
+    .p > .profile .pp-div { margin-left: 10px; flex-shrink: 0; flex: 80px; display: flex; align-content: center; margin: auto; display: grid; padding: 5px 0 5px 5px}
+    .p > .profile .pp-div > * { width: 100%; height: 100%; margin: auto; border-radius: 50%; border-width: 3px !important; grid-column: 1; grid-row: 1 }
+    .p > .profile .change-pp { background-color: rgba(0 0 0 / 0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transition: .1s }
+    .p > .profile .change-pp span { height: 30px; line-height: 30px; border-radius: 5px; display: flex; align-items: center }
+    .p > .profile .change-pp:hover { opacity: 1 }
 
-    .follow-list { background: var(--background-color-1st); height: calc(100% - 210px); width: calc(100% - 60px); border-radius: 10px; display: none; overflow: hidden auto; z-index: 3; position: absolute }
-    .follow-list > a:first-of-type { padding: 20px 20px 10px 20px; display: inline-block; font-size: 22px; float: left; width: calc(100% - 70px) }
-    .follow-list > ul { margin: 0; padding: 10px 10px }
-    .follow-list > ul > li { display: inline-block; list-style-type: none; margin: 10px; height: 60px; background-color: var(--background-color-2nd); border-radius: 10px; padding: 10px; width: calc(50% - 20px); overflow: hidden; white-space: nowrap; cursor: pointer; user-select: none }
-    .follow-list > ul > li > * { display: inline-block; float: left }
-    .follow-list > ul > li > img { height: 40px; border-radius: 5px }
-    .follow-list > ul > li > span { line-height: 40px; font-size: 30px; margin-left: 10px; width: calc(100% - 100px) }
-    .follow-list > a:last-of-type { margin: 0 20px; display: none }
-    .follow-list > b { display: inline-block; float: right; background-color: red; margin: 20px 20px 0 0; width: 30px; height: 30px; text-align: center; line-height: 30px; border-radius: 5px; cursor: pointer; user-select: none }
+    .p > .profile .details { padding: 0 20px; max-width: calc(100% - 240px); display: flex; flex-direction: column }
+    .p > .profile .details > * { margin: 0 }
+    .p > .profile .details div { width: 100%; max-height: 50px; overflow: hidden auto; flex-grow: 1 }
+    .p > .profile .details div textarea { margin-top: 5px; background-color: inherit; border-style: dashed; width: 100%; height: calc(100% - 5px); resize: none }
+
+    .p > .profile .following { flex: 0 0 2em; white-space: nowrap; display: flex; flex-basis: 150px }
+    .p > .profile .following ul { display: flex; flex-direction: row; flex-wrap: wrap; padding: 5px; margin: 0; align-content: center; justify-content: center }
+    .p > .profile .following li { list-style: none; flex-grow: 0; cursor: pointer }
+    .p > .profile .following button { background-color: limegreen }
+
+    .p > .profile .buttons { height: 50px; align-items: center; padding: 5px }
+    .p > .profile .buttons button { background-color: var(--bg-color-2); line-height: 30px !important; user-select: none; line-height: 30px }
+    /* #endregion PROFILE */
+
+    /* #region CONTENT */
+    .p > .content { height: calc(100% - 180px); width: 100%; display: flex }
+
+    .p > .content .following-list { border-radius: 10px; margin: 10px; padding: 20px; display: none; transition: .3s; overflow: hidden auto }
+    .p > .content .following-list > div > span { font-size: 1.25em }
+    .p > .content .following-list > div { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center }
     
-    .usercontent > div { width: calc(100% - 60px); max-width: 700px; left: calc(50% - 30px); position: absolute; transform: translateX(-50%); margin: 0 0 10px 0; overflow-y: auto }
-    .usercontent > div > ul > li { list-style-type: none; width: 100%; background-color: var(--background-color-3rd); margin: 10px 0; padding: 10px; border-radius: 10px; display: block; padding: 15px 45px }
-    .usercontent > div > ul > li > hr { border: 1px solid var(--background-color-4th) }
-    .usercontent > div > ul > li > span { font-size: 18px }
-    .usercontent > div > ul > li > span > img { border-radius: 5px }
-    .usercontent > div > a { display: block; margin-left: 50px; display: none }
+    .p > .content .following-list ul { display: flex; padding: 0; margin: 0; flex-wrap: wrap; row-gap: 6px; column-gap: 6px; margin: 10px }
+    .p > .content .following-list li { list-style: none; height: 58px; flex-basis: calc(33.33% - 4px); background: inherit; transition: .3s }
+    .p > .content .following-list li div { display: flex; height: 58px; font-size: 1.25em; justify-content: flex-start; flex-grow: 1; padding: 5px; border-radius: 10px }
+    .p > .content .following-list li span { margin-left: 4px; line-height: 48px }
+    .p > .content .following-list li img { height: 100%; padding: 4px; border-radius: 50% }
+    .p > .content .following-list li:hover { filter: brightness(110%); cursor: pointer }
+    .p > .content .following-list li:active { filter: brightness(120%) }
+    .p > .content .following-list > button { width: 100% }
+    .p > .content .following-list button { background-color: var(--bg-color-button); font-size: 1.2em }
+
+    .p > .content .posts-profile { width: 100% }
     
-    #compose-button { display: none; position: absolute; bottom: 30px; right: 30px; width: 30px; height: 30px; background-color: var(--background-color-3rd); border-radius: 50%; text-align: center; line-height: 30px; font-size: 20px; cursor: pointer; user-select: none }
-    #compose { position: absolute; left: 0; display: none }
-    #compose > div { width: 75%; height: 75%; background: var(--background-color-top-1st); border-radius: 10px }
-    #compose > div > textarea { margin: 10px; width: calc(100% - 20px); height: calc(100% - 50px); resize: none }
-    #compose > div > span { float: right; margin-right: 10px; cursor: pointer }
+    .p > .content .page-no { margin: 20px auto 0; display: flex; padding: 0; justify-content: center; max-width: 680px; flex-wrap: wrap }
+    .p > .content .page-no li { list-style: none; cursor: pointer; margin: 0 5px; color: var(--bg-color-text-button); font-weight: bold; user-select: none }
+    /* #endregion CONTENT */
 
-    #upload-pp { width: 100px; height: 100px; display: inline-block; position: absolute; opacity: 0; transition: 0.1s }
-    #upload-pp:hover { opacity: 1 }
-    #upload-pp:hover::after { opacity: 0 }
-    #upload-pp > button { margin-top: 5px; left: 50%; transform: translateX(-50%); position: absolute; background-color: var(--background-color-2nd) }
-    #image-crop { left: 0; user-select: none; -webkit-user-drag: none }
-    #image-crop > div { width: 80%; height: 80%; background-color: var(--background-color-top-1st); border-radius: 15px; padding: 15px; overflow: hidden; border: 10px solid var(--background-color-top-1st); outline: 10px solid rgba(0 0 0 / 0.5); outline-offset: -10px }
-    #image-crop > div > * { -webkit-user-drag: none }
-    #image-crop > div > img { border-radius: 10px }
-    #image-crop > div > input { bottom: 20px; -webkit-appearance: none; background-color: var(--background-color-top-2nd); height: 20px; border-radius: 10px; outline: 2px solid var(--color); padding: 0 }
-    #image-crop > div > input::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin: 0px; border-radius: 50%; background: var(--color); cursor: pointer; outline: 10px solid var(--color); outline-offset: -5px }
-    #image-crop > div > span:first-of-type { border: 3px dashed var(--color); border-radius: 10px; outline: calc(100vw) solid rgba(0 0 0 / 0.5) }
-    #image-crop > div > span:last-of-type { border: 2px solid var(--color); border-radius: 50% }
-    #image-crop > div > div > button { background-color: var(--background-color-top-2nd); border: 5px solid var(--background-color-top-1st); font-size: 120%; z-index: 2 }
+    @media (max-width: 1000px) {
+        .p > .content .following-list li { flex-basis: calc(50% - 6px)}
+    }
+    @media (max-width: 700px) {
+        .p > .content .following-list li { flex-basis: calc(100%)}
+    }
 
-    @media (max-width: 800px) {
-        .profile { height: 180px }
-        .profile > div:nth-of-type(2) > p { width: calc(100% - 10px) }
-        .profile > div:last-of-type > br { display: none }
-        .profile > div:last-of-type { left: 30px; top: unset; bottom: 5px; transform: translateY(calc(10% - 10px)) }
-        
-        .follow-list { height: calc(100% - 270px) }
-        .follow-list > ul > li { width: calc(100% - 10px) }
-        
-        .profile-page { height: calc(100% - 90px) }
+    @media (max-width: 580px){
+        .p > .profile { height: 210px }
+        .p > .profile .user { flex-wrap: wrap; height: 140px }
+        .p > .profile .user .pp-div { height: 64px; width: 64px; flex: 64px }
+        .p > .profile .user .details { max-width: calc(100% - 74px) }
+        .p > .profile .user .details h1 { font-size: 1.5em}
+        .p > .profile .user .details div { max-height: 59px }
+        .p > .profile .user .following { flex-direction: row; flex: 100%; align-content: center; margin: 0; height: 40px }
+        .p > .profile .user .following ul { padding: 0; overflow: hidden; flex-wrap: nowrap; justify-content: flex-start }
+        .p > .profile .user .following li { align-self: center; margin: 5px }
+        .p > .profile .user .following button > span { display: none }
+        .p > .content { height: calc(100% - 220px) }
+    }
+    @media (max-width:480px){
+        .p > .profile .user .details h1 { font-size: 1.5em }
+        .p > .profile .user .details div { max-height: 65px }
     }
 </style>
+
 <script>
-    var pd = {
-        user: { name: pathname[0].substring(1) },
-        page: Object.assign(by.class('profile-page')[0],
-            {
-                top: () => { pd.page.style.overflowY = 'hidden'; pd.page.scrollTo(0, 0) },
-                normal: () => pd.page.style.overflowY = 'auto'
+    Object.assign(p, {
+        profile:
+            Object.assign(p.querySelector('.details'), {
+                username: d.querySelectorAll('.p .username'),
+                bio: p.querySelector('.profile .bio'), bioInput: p.querySelector('.profile .bio-input'),
+                pp: p.querySelector('.profile .pp')
             }),
-        profile: Object.assign(by.selector('.profile > div:nth-of-type(2)'),
-            {
-                photo: by.selector('.profile > div:first-of-type > img'), photoChange: by.id('upload-pp'),
-                username: by.selector('.profile > div:nth-of-type(2) > h1'), usernameInner: by.selector('.profile > div:nth-of-type(2) > h1 > span'),
-                bioInput: by.selector('.profile > div:nth-of-type(2) > input'), bio: by.selector('.profile > div:nth-of-type(2) > p'),
-                followings: by.selector('.profile > div:last-of-type > a:first-of-type > span'), followers: by.selector('.profile > div:last-of-type > a:last-of-type > span'),
-                follow: Object.assign(by.selector('.profile > div:last-of-type > button'), { text: by.selector('.profile > div:last-of-type > button > span'), unfollow: by.selector('.profile > div:last-of-type > button > svg:first-of-type'), follow: by.selector('.profile > div:last-of-type > button > svg:last-of-type') })
-            }),
-        followList: Object.assign(by.class('follow-list')[0],
-            {
-                followings: [],
-                followers: [],
-                page: 0
-            }),
-        usercontent: Object.assign(by.class('usercontent')[0],
-            {
-                postsList: by.selector('.usercontent > div > ul'),
-                loadMore: by.selector('.usercontent > div > a'),
-                posts: [],
-                page: 0
-            }),
-            compose: Object.assign(by.selector('#compose'), {
-                button: by.id('compose-button'),
-                send: by.selector('#compose > div > span:first-of-type'),
-                cancel: by.selector('#compose > div > span:last-of-type'),
-                textarea: by.selector('#compose > div > textarea')
-            })
-    }; pd.user.isLoggedUsser = loggedUser && pd.user.name == loggedUser.username
 
-    //#region LOAD PROFILE
-    pd.profile.usernameInner.innerText = pd.user.name
-    fetchJSON(backEndUrl + `users/${pd.user.name}` + (loggedUser ? `?id=${loggedUser.id}` : '')).then(([json, ok]) => {
-        if (ok) {
-            pd.profile.photo.src = avatarUrl(json.id, json.avatar)
-            pd.profile.usernameInner.innerText = json.username + (getFlag(json.flags, 'mod') ? '*' : '')
-            pd.profile.bio.innerText = pd.profile.bioInput.value = json.bio, pd.profile.bioInput.placeholder = 'bir şey yaz!'
-            pd.profile.followings.innerText = json.followings, pd.profile.followers.innerText = json.followers
-            pd.profile.follow.unfollow.style.display = ['none', 'inline-block'][+json.followed_by_you], pd.profile.follow.follow.style.display = ['inline-block', 'none'][+json.followed_by_you]
-            by.selector('.profile > div:last-of-type > button > span').innerText = ['takip et', 'takipten çık'][+json.followed_by_you]
-            pd.profile.follow.style.backgroundColor = ['#1EB955', 'red'][+json.followed_by_you]
-            pd.profile.follow.style.display = ['inline-block', 'none'][+(pd.user.isLoggedUsser || !loggedUser.id)]
-            pd.profile.data = json
-            for (flag of flags.user) if (getFlag(json.flags, flag)) { var f = document.createElement('img'); f.src = `/images/svg/flags/${flag}.svg`; pd.profile.username.appendChild(f) }
-            if (getFlag(json.flags, 'mod')) pd.profile.bio.innerHTML = json.bio
-            pd.profile.style.paddingTop = (120 - pd.profile.clientHeight) / 2
-            pd.profile.follow.parentElement.style.display = 'block'
-            pd.profile.bio.style.display = ['block', 'none'][+pd.user.isLoggedUsser]
-            pd.compose.button.style.display = pd.profile.photoChange.style.display = pd.profile.bioInput.style.display = ['none', 'block'][+pd.user.isLoggedUsser]
-            pd.usercontent.renderPage()
-        }
-        else redirect('404')
-    })
-    //#endregion
-
-
-    //#region USERCONTENT
-    pd.compose.button.onclick = () => { pd.compose.style.display = 'flex'; pd.page.top() }
-    pd.compose.cancel.onclick = () => { pd.compose.style.display = 'none'; pd.page.normal() }
-    pd.compose.send.onclick = () => {
-        pd.page.top()
-        var content = pd.compose.textarea.value
-        if (content && content.match(/[\w\d]/g).length < 4) return alert.error('Gönderi içeriği çok kısa!')
-        fetchJSON(backEndUrl + `posts`, { method: 'post', body: { content: content }, headers: { auth: token } }, true).then(() => {
-            pd.profile.data.posts += 1; pd.usercontent.posts.splice(0, 0, { user_id: pd.profile.data.id, content: content })
-            if (pd.profile.data.posts.toString().endsWith('1') && pd.profile.data.posts > 10) pd.usercontent.posts.pop()
-            pd.usercontent.postsList.innerHTML = '', pd.usercontent.page = 0
-            pd.usercontent.renderPage(); pd.compose.style.display = 'none'; pd.page.normal()
-        })
-    }
-    pd.usercontent.renderPage = async () => {
-        if (pd.usercontent.posts.length < Math.min(pd.usercontent.page * 10 + 10, pd.profile.data.posts)) pd.usercontent.posts.push(...(await fetchJSON(backEndUrl + `users/${pd.profile.data.id}/posts?offset=${pd.usercontent.page * 10}`))[0])
-        pd.usercontent.loadMore.style.display = ['none', 'block'][+(pd.usercontent.page * 10 + 10 < pd.profile.data.posts)]
-        for (let post of pd.usercontent.posts.slice(pd.usercontent.page * 10, pd.usercontent.page * 10 + 10)) pd.usercontent.postsList.appendChild(postElement(pd.profile.data, post))
-    }
-    pd.usercontent.loadMore.onclick = () => { pd.usercontent.page++; pd.usercontent.renderPage() }
-    //#endregion
-
-    //#region ACTIONS
-    //follow
-    pd.profile.follow.onclick = () => {
-        fetchJSON(backEndUrl + `users/${pd.profile.data.id}/${pd.profile.data.followed_by_you ? 'un' : ''}follow`, { headers: { auth: token } }, true).then(([json, ok]) => {
-            pd.profile.data.followers += (pd.profile.data.followed_by_you ? -1 : 1)
-            pd.profile.followers.innerText = pd.profile.data.followers
-            pd.profile.data.followed_by_you = !pd.profile.data.followed_by_you
-            pd.profile.follow.unfollow.style.display = ['none', 'inline-block'][+pd.profile.data.followed_by_you], pd.profile.follow.follow.style.display = ['inline-block', 'none'][+pd.profile.data.followed_by_you]
-            pd.profile.follow.text.innerText = ['takip et', 'takipten çık'][+pd.profile.data.followed_by_you]
-            pd.profile.follow.style.backgroundColor = ['#1EB955', 'red'][+pd.profile.data.followed_by_you]
-        })
-    }
-
-    //update bio
-    pd.profile.bioInput.addEventListener('focusout', ({ target }) => { fetchJSON(backEndUrl + 'settings', { method: 'post', body: [{ action: 'update-bio', content: target.value.substring(0, 255) }], headers: { auth: token } }, true); return true })
-    document.body.onresize = () => pd.profile.style.paddingTop = (120 - pd.profile.clientHeight) / 2
-
-    //change pp
-    if (pd.user.isLoggedUsser) {
-        var uploadPp = async (state) => {
-            if (state) {
-                imageCrop.ratio2 = Math.max(imageCrop.img.sizeX, imageCrop.img.sizeY) / imageCrop.len / imageCrop.img.scale
-                var p = [Math.abs(imageCrop.img.xPosition + imageCrop.frameSize / 2 - imageCrop.img.width / 2) * imageCrop.ratio2, Math.abs(imageCrop.img.yPosition + imageCrop.frameSize / 2 - imageCrop.img.height / 2) * imageCrop.ratio2,
-                Math.abs(imageCrop.img.xPosition - imageCrop.frameSize / 2 - imageCrop.img.width / 2) * imageCrop.ratio2, Math.abs(imageCrop.img.yPosition - imageCrop.frameSize / 2 - imageCrop.img.height / 2) * imageCrop.ratio2]
-                imageCrop.context.drawImage(imageCrop.img, p[0], p[1], p[2] - p[0], p[3] - p[1], 0, 0, 512, 512)
-                imageCrop.data = imageCrop.canvas.toDataURL()
-                imageCrop.context.clearRect(0, 0, imageCrop.canvas.width, imageCrop.canvas.height)
-                imageCrop.input.style.display = by.selector('#image-crop > div > div').style.display = imageCrop.frames[1].style.display = imageCrop.frames[0].style.border = 'none'
-                upload(imageCrop.data, '', 'usercontent-avatar').then(([json, ok]) => {
-                    if (ok) { loggedUser.avatarUrl = cdnUrl + json; logged(true) }
-                    else alert.error(json); redirect(pathname[0])
+        following:
+            Object.assign(p.querySelector('.following'), {
+                button: p.querySelector('.following button'),
+                followerCount: p.querySelector('.following .follower-count'),
+                followingCount: p.querySelector('.following .following-count'),
+                followings: p.querySelector('.following .followings'),
+                followers: p.querySelector('.following .followers'),
+                list: Object.assign(p.querySelector('.following-list'), {
+                    label: p.querySelector('.following-list .label'),
+                    back: p.querySelector('.following-list > div > button'),
+                    loadMore: p.querySelector('.following-list > button'),
+                    ul: p.querySelector('.following-list ul'),
+                    page: 0
                 })
-            }
-            else {
-                pd.page.top()
-                imageCrop.canvas = document.createElement('canvas'), imageCrop.canvas.height = imageCrop.canvas.width = 512, imageCrop.context = imageCrop.canvas.getContext("2d")
-                imageCrop.img.src = await filedialog('image/png,image/jpeg', true)
-                imageCrop.style.display = 'flex'; imageCrop.img.xPosition = 0, imageCrop.img.yPosition = 0
-                imageCrop.img.xPosition = imageCrop.img.yPosition = 0, imageCrop.img.scale = 1
-                imageCrop.img.style.top = imageCrop.img.style.left = '50%'
-            }
-        }
-        var imageCrop = by.id('image-crop'); imageCrop.click = false, imageCrop.touch = [0, 0], imageCrop.enableTouchMove = true
-        imageCrop.frames = by.selectorAll('#image-crop > div > span'), imageCrop.div = by.selector('#image-crop > div'),
-            imageCrop.img = by.selector('#image-crop > div > img'), imageCrop.input = by.selector('#image-crop > div > input')
-        imageCrop.fixSizes = () => {
-            for (let frame of imageCrop.frames) frame.style.width = frame.style.height = imageCrop.frameSize
-            imageCrop.input.style.width = imageCrop.frameSize
-            if (imageCrop.img.width < imageCrop.img.height) imageCrop.img.style.height = imageCrop.len * imageCrop.img.scale
-            else imageCrop.img.style.width = imageCrop.len * imageCrop.img.scale
-        }
-        imageCrop.moveImage = (x, y) => {
-            imageCrop.img.xPosition += x || 0, imageCrop.img.yPosition += y || 0
-            if (imageCrop.img.xPosition > imageCrop.img.width / 2 - imageCrop.frameSize / 2) imageCrop.img.xPosition = imageCrop.img.width / 2 - imageCrop.frameSize / 2
-            if (imageCrop.img.yPosition > imageCrop.img.height / 2 - imageCrop.frameSize / 2) imageCrop.img.yPosition = imageCrop.img.height / 2 - imageCrop.frameSize / 2
-            if (imageCrop.img.xPosition < -imageCrop.img.width / 2 + imageCrop.frameSize / 2) imageCrop.img.xPosition = -imageCrop.img.width / 2 + imageCrop.frameSize / 2
-            if (imageCrop.img.yPosition < -imageCrop.img.height / 2 + imageCrop.frameSize / 2) imageCrop.img.yPosition = -imageCrop.img.height / 2 + imageCrop.frameSize / 2
-            imageCrop.img.style.left = `calc(50% + ${imageCrop.img.xPosition}px)`, imageCrop.img.style.top = `calc(50% + ${imageCrop.img.yPosition}px)`
-        }
-        imageCrop.img.onload = () => {
-            imageCrop.ratio = (Math.min(imageCrop.img.width, imageCrop.img.height) / Math.max(imageCrop.img.width, imageCrop.img.height)), imageCrop.img.sizeX = imageCrop.img.width, imageCrop.img.sizeY = imageCrop.img.height
-            imageCrop.frameSize = Math.min(imageCrop.div.clientWidth, imageCrop.div.clientHeight) / 2
-            imageCrop.len = Math.min(imageCrop.div.clientWidth, imageCrop.div.clientHeight)
-            imageCrop.img.scale = imageCrop.input.value = imageCrop.input.min = 50 / imageCrop.ratio, imageCrop.input.max = 200 / imageCrop.ratio, imageCrop.img.scale = imageCrop.img.scale / 100
-            imageCrop.fixSizes()
-        }
-        window.onresize = imageCrop.fixSizes
-        imageCrop.input.oninput = () => { imageCrop.img.scale = imageCrop.input.value / 100; imageCrop.fixSizes(); imageCrop.click = false; imageCrop.moveImage() }
-        imageCrop.onmousedown = () => imageCrop.click = true; imageCrop.onmouseup = () => imageCrop.click = false
-        imageCrop.onmousemove = event => { if (imageCrop.click) imageCrop.moveImage(event.movementX, event.movementY) }
-        imageCrop.input.ontouchstart = () => { imageCrop.enableTouchMove = false }; imageCrop.input.ontouchend = () => imageCrop.enableTouchMove = true
-        imageCrop.ontouchstart = ({ touches: [{ screenX, screenY }] }) => imageCrop.touch = [screenX, screenY]
-        imageCrop.ontouchmove = ({ target, touches: [{ screenX, screenY }] }) => { if (imageCrop.enableTouchMove) imageCrop.moveImage(screenX - imageCrop.touch[0], screenY - imageCrop.touch[1]); imageCrop.touch = [screenX, screenY] }
-    } else by.id('upload-pp').remove()
+            }),
 
-    //followings - followers page
-    pd.followList.renderPage = async (t) => {
-        var ids = (await fetchJSON(backEndUrl + `users/${pd.profile.data.id}/${t}?offset=${pd.followList.page * 10}`, true))[0].reverse()
-        if (pd.followList[t].length < Math.min(pd.followList.page * 10 + 10, pd.profile.data[t])) pd.followList[t].push(...(await fetchJSON(backEndUrl + 'users/profiles?username&avatar&id', { method: 'post', body: ids }))[0])
-        pd.followList.children[3].style.display = ['none', 'block'][+(pd.followList.page * 10 + 10 < pd.profile.data[t])]
-        for (let user of pd.followList[t].slice(pd.followList.page * 10, pd.followList.page * 10 + 10).reverse()) {
-            let userElem = document.createElement('li')
-            userElem.onclick = () => redirect(`@${user.username}`, user.username)
-            userElem.innerHTML = `<img src="${avatarUrl(user.id, user.avatar)}"><span>@${user.username}</span>`
-            pd.followList.children[2].appendChild(userElem)
+        posts:
+            Object.assign(p.querySelector('.posts-profile'), {
+                list: p.querySelector('.posts-profile .posts-list'),
+                page: 0,
+                pages: p.querySelector('.posts-profile .page-no')
+            })
+    })
+    
+
+    //#region PROFILE
+    p.querySelector('.profile .banner').style.backgroundImage = `url('${p.user.profile.bannerURL}')`
+    p.profile.pp.src = p.user.profile.avatarURL
+    for (let user of p.profile.username) user.innerText = p.user.fullUsername
+    p.profile.bio.innerText = p.profile.bioInput.value = p.user.profile.bio
+
+    p.profile.bioInput.addEventListener('focusout', async ({ target }) => await withLoading(async () => await session.settings([{ name: 'update_bio', content: p.profile.bioInput.value }])))
+    p.following.button.onclick = async () => {
+        await withLoading(async () => p.user.profile.followed ? await p.user.unfollow() : await p.user.follow())
+        p.following.update()
+    }
+    p.querySelector('.change-pp').onclick = async () => p.profile.pp.src = await changeAvatar() 
+
+    //  if my profile
+    if (p.isLoggedUser) p.profile.bio.style.display = 'none'
+    else p.querySelector('.change-pp').style.display = p.profile.bioInput.style.display = 'none'
+
+    //  if not logged
+    if (!p.user._session.logged) p.following.button.style.display = 'none'
+    //#endregion
+
+
+    //#region FOLLOWING LIST
+    p.following.list.render = async (t) => {
+        var followers = []
+        followers = await withLoading(async () => t == 'followers' ? await p.user.getFollowers(30, p.following.list.page * 30) : await p.user.getFollowings(30, p.following.list.page * 30))
+        if (p.following.list.page * 30 + 30 > (t == 'followers' ? p.user.profile.follower_count : p.user.profile.following_count)) p.following.list.loadMore.style.display = 'none'
+        else p.following.list.loadMore.style.display = 'block'
+        for (let user of followers) {
+            if (!user) continue
+            let li = d.createElement('li'), username = d.createElement('span'), avatar = d.createElement('img'), div = d.createElement('div')
+            div.className = 'bd', username.innerText = user.fullUsername, avatar.src = user.profile.avatarURL
+            div.onclick = () => redirect(`/@${user.username}`)
+            div.appendChild(avatar); div.appendChild(username); li.appendChild(div)
+            p.following.list.ul.appendChild(li)
         }
     }
-    pd.followList.f = async (t) => {
-        pd.page.top()
-        if (!pd.profile.data) return
-        pd.followList.children[1].innerText = `@${pd.profile.data.username}${(getFlag(pd.profile.data.flags, 'mod') ? '*' : '')} kullanıcısının ${t == 'followings' ? 'takipleri' : 'takipçileri'}`
-        pd.followList.children[2].innerHTML = ''
-        pd.followList.children[3].style.display = 'none'
-        pd.followList.children[3].onclick = () => ((t) => { pd.followList.page++; pd.followList.renderPage(t) })(t)
-        pd.followList.page = 0; pd.followList.renderPage(t)
-        pd.followList.style.display = 'block'
-        pd.compose.button.style.display = 'none'
+    p.following.list.back.onclick = () => {
+        p.posts.style.display = 'block'
+        p.following.list.style.width = 0, p.posts.style.width = '100%'
+        setTimeout(() => p.following.list.style.display = 'none', 200)
     }
-    pd.followList.children[0].onclick = () => { pd.followList.style.display = 'none'; pd.compose.button.style.display = 'block'; pd.page.normal() }
-    pd.profile.followings.parentElement.onclick = () => pd.followList.f('followings')
-    pd.profile.followers.parentElement.onclick = () => pd.followList.f('followers')
+    p.following.list.f = async (t) => {
+        p.following.list.ul.innerHTML = '', p.following.list.page = 0
+        p.following.list.loadMore.style.display = 'none', p.following.list.label.innerText = ['takipçileri', 'takipleri'][+(t == 'followings')]
+
+        await p.following.list.render(t)
+        p.following.list.loadMore.onclick = () => { p.following.list.page++; p.following.list.render(t) }
+
+        p.following.list.style.display = 'block', p.posts.style.display = 'none'
+        if (p.following.list.style.width != '100%') {
+            setTimeout(() => p.posts.style.display = 'none', 200)
+            p.following.list.style.width = 0
+            p.following.list.offsetWidth
+            p.following.list.style.width = '100%'
+        }
+    }
+    p.following.followings.onclick = () => p.following.list.f('followings')
+    p.following.followers.onclick = () => p.following.list.f('followers')
+    p.following.update = () => {
+        p.following.followerCount.innerText = p.user.profile.follower_count
+        p.following.followingCount.innerText = p.user.profile.following_count
+        if (p.isLoggedUser) return p.following.button.remove()
+        p.following.button.children[0].style.display = ['none', 'inline-block'][+p.user.profile.followed]
+        p.following.button.children[1].style.display = ['inline-block', 'none'][+p.user.profile.followed]
+        p.following.button.children[2].innerText = ['takip et', 'takipten çık'][+p.user.profile.followed]
+        p.following.button.style.backgroundColor = ['limegreen', 'red'][+p.user.profile.followed]
+    }
+    p.following.update()
+    //#endregion
+
+
+    //#region POSTS LIST
+    p.posts.render = async (page) => {
+        var posts = await withLoading(async () => await p.user.getPosts(page))
+        p.posts.list.innerHTML = '', p.posts.page = page
+        for (let post of posts) p.posts.list.appendChild(metw.gui.post(post))
+
+        p.posts.pages.innerHTML = ''
+
+        p.pageCount = Math.ceil(parseInt(p.user.profile.post_count / 15))
+        if (p.pageCount > 1) {
+            for (let page = p.pageCount + 1; page >= -1; page--) {
+                let li = d.createElement('li')
+                switch (page) {
+                    case p.pageCount + 1: li.onclick = () => withLoading(async () => { if (p.posts.page >= p.pageCount) return; p.posts.page++; await p.posts.render(p.posts.page) }), li.innerHTML = '‹‹ önceki '; break
+                    case -1: li.innerHTML = ' sonraki ››', li.onclick = () => withLoading(async () => { if (p.posts.page <= 0) return; p.posts.page--; await p.posts.render(p.posts.page) }); break
+                    default: li.onclick = () => withLoading(async () => await p.posts.render(page)), li.innerHTML = page + 1
+                }
+                p.posts.pages.appendChild(li)
+            }
+
+            for (let _page = 0; _page <= p.pageCount; _page++) p.posts.pages.children[p.pageCount - _page + 1].style.color = ['var(--bg-color-text-button)', 'white'][+(_page == page)]
+            p.posts.pages.children[0].style.color = ['var(--bg-color-text-button)', 'white'][+(page == p.pageCount)]
+            p.posts.pages.children[p.pageCount + 2].style.color = ['var(--bg-color-text-button)', 'white'][+(page == 0)]
+            window.history.pushState(null, '', pathname.join('/') + (page ? '?sayfa=' + (page + 1) : ''))
+        }
+
+    }
+    p.posts.render(parseInt(search.kwargs.sayfa) - 1 || 0)
     //#endregion
 </script>

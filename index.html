@@ -1,53 +1,67 @@
-<html>
+<!DOCTYPE html>
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0" />
-    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
     <title>metw.cc</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" sizes="192x192" href="/images/logo/circle-192.png">
-    <meta name="theme-color" content="#000000">
-    <link rel="canonical" href="https://metw.cc" />
     <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet" />
     <style>
-        @import url("/css/index.css?v2");
-        @import url("/css/loader.css?v2");
+        @import url("/css/index.css");
+        @import url("/css/dark-theme.css");
     </style>
-    <script src="/js/theme_loader.js?v2"></script>
-    <script defer src="/js/index.js?v3"></script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CYZ4QC3JH8"></script>
-    <script> window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-CYZ4QC3JH8') </script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-CYZ4QC3JH8')</script>
 </head>
-<body>
-    <div class="app full-size center">
-        <nav>
-            <div onclick="redirect('/')"><b>metw</b>.cc</div>
-            <div id="title-buttons">
-                <!--- a onclick="redirect('keşfet')">&nbsp;keşfet&nbsp;</a --->
-                <ul class="non-logged">
-                    <li onclick="redirect('giriş', 'Giriş')">&nbsp;giriş&nbsp;</li>
-                    <li onclick="redirect('kaydol', 'Kaydol')">&nbsp;katıl&nbsp;</li>
-                </ul>
-                <ul class="logged">
-                    <li onclick="redirect('ev', 'Ana Sayfa')">&nbsp;ev&nbsp;</li>
-                    <li class="icon" onclick="profile(loggedUser.username)">&nbsp;<img id="logged-user-profile-photo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" /><span class="desktop-screen">&nbsp;<a id="logged-user-username"></a></span>&nbsp;</li>
-                    <li class="icon" onclick="redirect('ayarlar', 'Ayarlar')">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>&nbsp;</li>
-                    <li class="icon" onclick="logout()">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>&nbsp;</li>
+<body class="bg-g">
+    <div id="inital-load-animation" class="s-full bg-g"> <div class="x-center"> <a class="x-center"><b>metw</b>.cc</a> <div class="loading-bar x-center"> <div class="blue-bar"></div> </div> </div> </div>
+    <div id="disable-mouse" class="s-full" style="display: none"></div>
+    <div id="progress-bar"></div>
+    <div id="loading-bar"></div>
+    <div id="compose-popup" class="center s-full">
+        <div class="center bg-1 bd">
+            <textarea oninput="filteredInput(event, /[\s\S]*/g, 1024)" class="bg-2" placeholder="yazmaya başla..."></textarea>
+            <button class="send ok-button">gönder</button>
+            <button class="cancel bd bg-1">iptal</button>
+        </div>
+    </div>
+    <div id="image-crop" class="center s-full">
+        <div class="center bg-1 bd main">
+            <img draggable="false" />
+            <div class="center bd frame"></div>
+            <input type="range" min="100" max="400" class="x-center bg-1" />
+            <div class="buttons x-center"> <button class="ok ok-button">onayla</button> <button class="cancel bd bg-1">iptal</button> </div>
+        </div>
+    </div>
+    <main class="s-full bg-2">
+        <nav class="w-full bg-1">
+            <div class="mx-auto">
+                <a href="javascript:redirect('/')">ptb.<b>metw</b>.cc</a>
+                <ul class="buttons">
+                    <li onclick="redirect('/')"><span class="icon small-screens">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>&nbsp;</span><span class="large-screens">&nbsp;ev&nbsp;</span></li>&nbsp;
+                    <li onclick="redirect('/keşfet')"><span class="icon small-screens">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>&nbsp;</span><span class="large-screens">&nbsp;keşfet&nbsp;</span></li>&nbsp;
+                    <span class="logged">
+                        <li onclick="redirect(`/@${session.username}`, session.username)" class="icon">&nbsp;<img id="user-photo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" />&nbsp;<span id="username" class="large-screens">user&nbsp;</span></li>
+                        <li onclick="redirect('/ayarlar', 'Ayarlar')" class="icon">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>&nbsp;</li>
+                        <li onclick="logout(); redirect('/')" class="icon">&nbsp;<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>&nbsp;</li>
+                    </span>
+                    <span class="non-logged">
+                        <li onclick="redirect('/giriş', 'Giriş Yap')">&nbsp;giriş&nbsp;</li>
+                        <li onclick="redirect('/katıl', 'Katıl')">&nbsp;katıl&nbsp;</li>
+                    </span>
                 </ul>
             </div>
         </nav>
-        <main class="full-x" id="main"></main>
-        <div class="full-size top" id="captcha" style="display: none">
-            <div class="captcha center">
-                <img id="captcha-image" src="" />
-                <button onclick="captcha(0, state = 0)">yenile</button>
-                <input id="captcha-input" placeholder="yukarıdaki sayılar" oninput="customInput(event, 4, /[^\d]/g)">
-                <div><button onclick="captcha(0, state = 1)">gönder</button><button onclick="captcha(0, state = 2)">iptal</button></div>
+        <button id="compose" class="logged">+</button>
+        <div class="page-outer p-outer s-full">
+            <div id="page" class="page p mx-auto"> 
             </div>
         </div>
-        <div class="full-size top" id="loader" style="display: none"><span class="loader center"></span></div>
-    </div>
+    </main>
+    <div id="unsported-resulition" class="x-center" style="display: none">çözünürlük desteklenmiyor</div>
+    <script src="https://www.google.com/recaptcha/api.js" defer></script>
+    <script src="/js/metw.js" id="metwjs"></script>
+    <script src="/js/metw-gui.js"></script>
+    <script src="/js/index.js"></script>
 </body>
-</html>

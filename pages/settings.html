@@ -1,0 +1,79 @@
+﻿<body>
+    <div class="profile bg-1">
+        <b>Profil</b>
+        <div class="avatar">
+            <b>avatar</b>
+            <img class="bd" />
+            <span>
+                <button class="ok-button change">değiştir</button>
+                <button class="bg-1 bd remove">sil</button>
+            </span>
+        </div>
+        <div class="banner">
+            <b>afiş</b>
+            <img class="bd" />
+            <span>
+                <button class="ok-button change">değiştir</button>
+                <button class="bg-1 bd remove">sil</button>
+            </span>
+        </div>
+    </div>
+    
+    <div class="password bg-1">
+        <b>Şifre</b>
+        <input class="bg-1 bd" placeholder="eski şifre" type="password" /> <br />
+        <input class="bg-1 bd" placeholder="yeni şifre" type="password" /> <br />
+        <input class="bg-1 bd" placeholder="yeni şifreyii onayla" type="password" /> <br />
+        <button class="ok-button change">değiştir</button>
+    </div>
+
+    <br />
+</body>
+
+<style>
+    .p > div { width: 100%; padding: 30px; border-radius: 10px; margin-bottom: 30px }
+    .p div > b { width: 100%; font-size: 1.1em; display: block; margin-bottom: 5px }
+    .p > div > b { font-size: 1.5em; width: 100% }
+    
+    .p .profile div { display: flex; padding: 10px; flex-wrap: wrap }
+    .p .profile .avatar img { height: 80px; border-radius: 100% }
+    .p .profile .banner img { height: 120px; border-radius: 10px }
+    .p .profile div span { height: 30px; align-self: flex-end; margin: 10px 0 10px 10px }
+    
+    .p .password input { margin-bottom: 5px; width: 250px; font-size: 1.05em }
+
+    @media (max-width: 650px) {
+        .p div { justify-content: center  }
+        .p div > b { text-align: center }
+        .p .password { display: flex; flex-wrap: wrap }
+        .p .password input { flex-basis: 100% }
+        .p .password br { display: none }
+    }
+</style>
+
+<script>
+    Object.assign(p, {
+        avatar: p.querySelector('.avatar img'),
+        banner: p.querySelector('.banner img'),
+        password: p.querySelectorAll('.password input')
+    })
+
+    p.avatar.src = session.user.profile.avatarURL
+    p.banner.src = session.user.profile.bannerURL
+
+    p.querySelector('.avatar .change').onclick = async () => p.avatar.src = await changeAvatar()
+    p.querySelector('.avatar .remove').onclick = async () => p.avatar.src = await removeAvatar()
+    p.querySelector('.banner .change').onclick = async () => p.banner.src = await changeBanner()
+    p.querySelector('.banner .remove').onclick = async () => p.banner.src = await removeBanner()
+
+    p.querySelector('.password .change').onclick = async () => {
+        if (p.password[0].value.length < 4) return alert.error('Şifre yanlış')
+        if (p.password[1].value != p.password[2].value) return alert.error('Şifreler uyuşmuyor')
+        if (p.password[1].value.length < 4) return alert.error('Şifre 4 karakterden kısa olamaz')
+        if ((await withLoading(async () => await session.settings([{ name: 'change_password', new_password: p.password[1].value, old_password: p.password[0].value }]))).change_password) alert.success('Şifre değiştirişdi')
+        else alert.error('Şifre hatalı')
+        p.password.forEach(i => i.value = '')
+    }
+
+    //await session.settings([{ name: 'change_password', old_password: '', new_password: '' }])
+</script>

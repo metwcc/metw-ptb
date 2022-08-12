@@ -1,57 +1,145 @@
-* { box-sizing: border-box; color: var(--color); font-family: "Source Code Pro", monospace;-webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important; -webkit-focus-ring-color: rgba(255, 255, 255, 0) !important }
+* { box-sizing: border-box; color: var(--color); font-family: "Source Code Pro", monospace; -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important }
 
-.full-x, .full-size { width: 100%; }
-.full-y, .full-size { height: 100%; }
-.fill-currentColor { fill: currentColor }
+.w-full, .s-full { width: 100% } .h-full, .s-full { height: 100% }
 
-.center-x, .center { left: 50%; transform: translateX(-50%); position: absolute }
-.center-y, .center { top: 50%; transform: translateY(-50%); position: absolute }
-.center { transform: translate(-50%, -50%); }
+.x-center, .center { left: 50%; position: absolute; transform: translateX(-50%) }
+.y-center, .center { top: 50%; position: absolute; transform: translateY(-50%) }
+.center { transform: translate(-50%, -50%) }
 
-.href { color: var(--link-color); text-decoration: underline; cursor: pointer }
-.icon svg, .icon img, .icon object { display: inline-flex; align-self: center; height: 1.25em; width: 1.2em; top: .25em; position: relative }
-body { background-color: var(--background-color-ground); overflow: hidden }
+.transformX-center { transform: translateX(-50%) }
+.transformY-center { transform: translateY(-50%) }
+.transform-center { transform: translate(-50%, -50%) }
+                                                                      
+.mb-4 { margin-bottom: 4px } .mx-auto { margin-left: auto; margin-right: auto } .my-auto { margin-top: auto; margin-bottom: auto }
 
-input, button, textarea { padding: 5px; border: none; border-radius: 5px; background-color: var(--background-color-3rd); outline: none; transition: 0.3s; cursor: pointer }
-input:-webkit-autofill{ -webkit-box-shadow: 30px 30px 30px 30px var(--background-color-3rd) inset !important; -webkit-text-fill-color: var(--color); }
+.bg-g { background-color: var(--bg-color-ground) } .bg-1 { background-color: var(--bg-color-1) } .bg-2 { background-color: var(--bg-color-2) } .bg-3 { background-color: var(--bg-color-3rd) }
+.bg-gt { background-color: var(--bg-color-top-ground) } .bg-1t { background-color: var(--bg-color-top-1) } .bg-2t { background-color: var(--bg-color-top-2) }
+.bd { border: 2px solid var(--bd-color) }
 
-.top { background-color: var(--background-color-top-ground); z-index: 10; display: none; top: 0; position: absolute; user-select: none }
-#loader { z-index: 9999 }
-#captcha { z-index: 9; transition: 0.3s }
-#captcha > div { width: 360px }
-#captcha-input { width: fit-content }
-#captcha > div > button, #captcha > div > div > button, #captcha > div > input { font-size: 18px; background-color: var(--background-color-top-1st); margin-top: 8px; margin-left: 8px }
-#captcha-image { width: 320px; height: 160px; border-radius: 10px }
-#captcha > div > * { float: right }
-#captcha > div > div > button:hover, #captcha > div > button:hover { background-color: var(--background-color-top-2nd) }
+.icon { display: inline-flex; align-content: center; align-items: center }
+.icon svg, .icon img { height: 1.25em }
 
-.app { background-color: var(--background-color-1st); max-width: 1600px }
-.app > main { height: calc(100% - 60px); background-color: var(--background-color-2nd); border: none; padding: 30px }
+.href { color: var(--link-color) }
 
-.app > nav { height: 60px; background-color: inherit; padding: 10px; padding-left: 20px; padding-right: 20px; user-select: none; transition: 0.3s }
-.app > nav > div:first-of-type { cursor: pointer; line-height: 40px; font-size: 28px; transition: 0.3s }
-.app > nav > div { display: inline-block }
-#title-buttons { float: right; font-size: 19px; margin-top: 4px; display: inline; text-align: center }
-#title-buttons > *, #title-buttons > ul > * {  padding: 10px; transition: 0.3s; cursor: pointer; border-radius: 10px; list-style-type: none; display: inline }
-#title-buttons > a:hover, #title-buttons > ul > li:hover { background-color: var(--background-color-4th) }
-#logged-user-profile-photo { border-radius: 5px }
+.ok-button { background-color: var(--bg-color-button); border: 2px solid var(--bg-color-button) }
+.load-more { width: calc(100% - 15px); background-color: var(--bg-color-button); font-size: 1.2em; margin: 10px }
 
-@media (max-width:800px) {
-    .app > nav { height: 96px }
-    .app > nav > div { display: block; position: absolute; left: 50%; transform: translateX(-50%) }
-    .app > nav > div:last-of-type { position: fixed; top: 48px; width: 100%  }
-    .app > main { height: calc(100% - 96px) }
-    .desktop-screen { display: none }
+input, button, textarea { padding: 5px; border: none; border-radius: 5px; outline: none }
+input[type=range] { padding: 0 }
+button { transition: .3s; cursor: pointer }
+button:hover { filter: brightness(110%) }
+button:active { filter: brightness(120%) }
+*::placeholder { color: var(--color); opacity: 0.1 }
+
+body { margin: 0; overflow: hidden }
+
+main { position: fixed; top: 0 }
+main > nav { height: 60px; padding-top: 5px; user-select: none; transition: .3s }
+main > nav > div { justify-content: space-between; vertical-align: middle; max-width: 1200px; display: flex; padding: 0 16px }
+main > nav > div > * { height: 50px; margin: 0 }
+main > nav > div > a { font-size: 36px; cursor: pointer; text-decoration: none }
+main > nav .buttons { list-style-type: none; padding: 0; font-size: 17px; display: flex }
+main > nav .buttons > * { margin: auto  }
+main > nav .buttons img { border-radius: 50% }
+main > nav .buttons li { height: 40px; line-height: 40px; border-radius: 5px; transition: 0.3s; cursor: pointer; background-color: var(--bg-color-1) }
+main > nav .buttons li:hover { filter: brightness(110%) }
+main > nav .buttons li:active { filter: brightness(120%) }
+.small-screens { display: none }
+
+@media (max-width: 285px) {
+    main { display: none }
+    #unsported-resulition { display: inline-block !important; margin: 20px 0 }
 }
 
-@media (min-width:1500px) {
-    .app { height: calc(100% - 40px); width: calc(100% - 40px); border-radius: 10px }
-    .app > nav  { border-top-left-radius: 10px; border-top-right-radius: 10px }
-    .app > main { border-bottom-left-radius: 10px; border-bottom-right-radius: 10px }
-} 
+@media (max-width: 750px) {
+    main > nav > div { flex-direction: row; justify-content: center; flex-wrap: wrap }
+    main > nav > div > a { font-size: 32px;  height: 40px }
+    main > nav > div > ul { height: 40px; width: 100%; justify-content: space-around; font-size: 16px; margin-top: 7.5px }
+    main > nav > div > * { flex-basis: 100%; text-align: center; vertical-align: middle }
+    main > nav { height: 100px }
+
+    .p-outer { height: calc(100% - 100px) !important  }
+
+    .small-screens { display: flex }
+    .large-screens { display: none }
+}
+
+@keyframes inital-load-animation { 0% { transform: translateX(-10px) } 50% { transform: translateX(60px) } 100% { transform: translateX(-10px) } }
+#inital-load-animation { z-index: 100; position: fixed; top: 0 }
+#inital-load-animation > div { top: 25%; width: 190px; height: 0px }
+#inital-load-animation a { font-size: 36px; transform: translate(-50%, -100%) }
+#inital-load-animation .loading-bar { background-color: var(--color); width: 130px; height: 3px; overflow: hidden }
+#inital-load-animation .blue-bar { background-color: royalblue; width: 80px; height: 3px; animation: inital-load-animation 1s ease-in-out infinite }
+
+#disable-mouse { opacity: 0; z-index: 99; position: absolute; top: 0 }
+#progress-bar, #loading-bar { background-color: var(--color); height: 2px; z-index: 98; position: absolute; top: 0; opacity: 0.7; transition: .1s }
+#progress-bar { width: 0 }
+@keyframes loading-bar { 0% { left: -10% } 100% { left: 100% } }
+#loading-bar { width: 10%; position: absolute; animation: loading-bar 1s ease-in-out infinite; display: none; z-index: 99 }
+
+.page { max-width: 1200px; padding: 30px; height: calc(100% - 60px) }
+
+#compose { position: absolute; right: 0; bottom: 0; background-color: var(--bg-color-button); width: 64px; height: 64px; justify-content: center; align-items: center; font-size: 32px; border-radius: 50%; margin: 32px; z-index: 9 }
+#compose-popup { background: rgba(0 0 0 / 0.2); z-index: 97; display: none }
+#compose-popup div { display: flex; padding: 10px; border-radius: 10px; width: 75%; height: 75%; flex-wrap: wrap; justify-content: flex-end }
+#compose-popup textarea { resize: none; width: 100%; height: calc(100% - 49px); font-size: 1.2rem }
+#compose-popup button { flex-grow: 0; padding: 4px; margin: 8px 0 0 8px; font-size: 1.25rem }
+#compose-popup textarea::-webkit-scrollbar-thumb { background-color: var(--bg-color-1) }
+
+#image-crop { background: rgba(0 0 0 / 0.2); z-index: 2; display: none }
+#image-crop .main { border-radius: 10px; width: 85%; height: 85%; overflow: hidden; user-select: none }
+#image-crop input { z-index: 4; position: absolute; bottom: 10px }
+#image-crop .frame { border-style: dashed; border-radius: 10px; outline: max(100vw, 100vh) solid rgba(0 0 0 / 0.2); z-index: 3 }
+#image-crop img { position: absolute; transform: translate(-50%, -50%) }
+#image-crop .buttons { margin-top: 20px; z-index: 4 }
+#image-crop button {padding: 4px; font-size: 1.25em }
+#image-crop input { bottom: 20px; -webkit-appearance: none; height: 20px; border-radius: 10px; outline: 2px solid var(--color); padding: 0; width: 60% }
+#image-crop input::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin: 0px; border-radius: 50%; background: var(--color); cursor: pointer; outline: 10px solid var(--color); outline-offset: -5px }
 
 ::-webkit-scrollbar { width: 16px; }
-::-webkit-scrollbar-track { background: var(--background-color-1st); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
-::-webkit-scrollbar-thumb { background: var(--background-color-ground); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
-    ::-webkit-scrollbar-thumb:hover { background: var(--background-color-ground); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
-  
+::-webkit-scrollbar-track { background-color: inherit; border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
+::-webkit-scrollbar-thumb { background-color: var(--bg-color-ground); border-radius: 8px; border: 4px solid transparent; background-clip: padding-box }
+.p-outer::-webkit-scrollbar-thumb { background-color: var(--bg-color-1) }
+
+
+.posts-list { padding: 0; display: flex; max-width: 700px; margin: 20px auto; flex-direction: row; flex-wrap: wrap  }
+.posts-list li { margin: 0; list-style: none; width: 100%; padding: 20px 30px; margin: 10px; border-radius: 10px; width: calc(100% - 20px) }
+.posts-list hr { border-width: 1px }
+.posts-list .content { overflow: hidden; cursor: pointer }
+.posts-list .user { display: flex; align-items: center; font-size: 1.25em; cursor: pointer }
+.posts-list .user img { height: 1.5em; margin-right: 10px; border-radius: 50% }
+.posts-list .date, .posts-list li .icon { margin-top: 10px }
+.posts-list .icon svg:last-of-type,
+.posts-list .icon span:last-of-type { cursor: pointer }
+
+.posts-list .icon span { margin: 0 5px }
+.posts-list .icon svg { margin-left: 5px }
+.posts-list .icon svg:first-of-type { margin-left: 0; transition: .3s  }
+.posts-list .icon svg:first-of-type:hover { transform: scale(1.2); cursor: pointer }
+.posts-list .icon svg:first-of-type:active { transform: scale(1.4); fill: #F87171 }
+
+
+.comments > b { margin: 20px 0 0 10px; display: block }
+.comments > textarea { font-size: 1em; margin: 10px; width: calc(100% - 20px); resize: none }
+.comments > button { background-color: var(--bg-color-button); padding: 8px; margin: 8px 10px 0 auto; font-size: 1rem; display: block }
+
+.comments-list { padding: 0; display: flex; max-width: 700px; margin: 20px auto 10px; flex-direction: row; flex-wrap: wrap }
+.comments-list .comment-group { width: 100% }
+.comments-list > .comment-group { overflow-x: auto }
+.comments-list .comment { padding: 20px 30px; margin: 10px; border-radius: 10px }
+.comments-list .comment .user { display: flex; align-items: center; font-size: 1.25em; cursor: pointer }
+.comments-list .comment .user img { height: 1.5em; margin-right: 10px; border-radius: 50% }
+.comments-list .comment .date, .comments-list .footer { margin-top: 10px; width: 100%; display: flex }
+.comments-list .comment .footer { justify-content: flex-end }
+.comments-list .comment .footer .reply { cursor: pointer }
+.comments-list .comment .footer .reply * { color: var(--bg-color-text-button); fill: var(--bg-color-text-button) }
+.comments-list > .comment-group::-webkit-scrollbar-thumb { background-color: var(--bg-color-1) }
+
+.comments-list .write-reply { padding: 0 10px 10px 10px; padding: 0 20px }
+.comments-list .write-reply textarea { width: 100%; resize: none }
+.comments-list .write-reply button { background-color: var(--bg-color-button); margin: 8px 0 0 auto; font-size: 1rem; display: block }
+
+.comments-list .replies { padding-left: 20px; min-width: 300px}
+.comments-list .replies .write-reply { padding-bottom: 0 }
+
+.p-outer { overflow-y: auto; height: calc(100% - 50px) }

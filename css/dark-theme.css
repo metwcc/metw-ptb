@@ -1,13 +1,14 @@
 :root {
     --color: white;
     --link-color: aqua;
-    --background-color-ground: #202225;
-    --background-color-1st: #2F3136;
-    --background-color-2nd: #36393F;
-    --background-color-3rd: #2F3136;
-    --background-color-4th: #36393F;
-    --background-color-5th: #2F3136;
-    --background-color-top-ground: rgba(255, 255, 255, 0.05);
-    --background-color-top-1st: #202225;
-    --background-color-top-2nd: #292A2C;
+    --bg-color-ground: #111827;
+    --bg-color-1: #1F2937;
+    --bg-color-2: #111827;
+    --bg-color-3: #1F2937;
+    --bd-color: #374151;
+    --bg-color-top-ground: rgba(255, 255, 255, 0.05);
+    --bg-color-top-1: #202225;
+    --bg-color-top-2: #292A2C;
+    --bg-color-button: #6366F1;
+    --bg-color-text-button: #7480F8
 }

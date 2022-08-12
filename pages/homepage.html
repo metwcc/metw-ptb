@@ -1,55 +1,60 @@
-﻿<div id="homepage">
-    <div class="full-size">
-        <ul></ul>
-        <ul></ul>
+﻿<script init>
+    p.posts = []
+    p.render = async (offset) => {
+        var data = await session.homepage(offset), posts = []
+        await session.getUsers(data.map(i => i.user_id))
+        for (i of data)
+            posts.push(new metw.Post({ ...i, user: await session.getUser(i.user_id), session: session }))
+        return posts
+    }
+    if (session.logged) p.posts = await p.render(0)
+    resolve()
+</script>
+
+<body>
+    <div class="not-logged">
+        <h1>metw.cc</h1> - dünyanın en iyi web sitesi<br />
         <br />
+        <span><b onclick="redirect('/giriş')">Giriş yapın</b>, <b onclick="redirect('/katıl')">kaydolun</b> veya <b onclick="redirect('/keşfet')">keşfedin</b></span>
     </div>
-</div>
+    <div class="logged">
+        <div class="quiet">
+            Burası sizin ana sayfanız. Takip ettiklerinizin gönderileri burada gözükür.<br />
+            Ancak bir sessizlik... Takip edecek <b onclick="redirect('/keşfet')">birisini bulmaya ne dersiniz?</b>
+        </div>
+        <ul class="posts-list"> </ul>
+        <button class="load-more">daha eski gönderiler</button><br /><br />
+    </div>
+</body>
+
 <style>
-    #homepage > div { overflow-y: auto; overflow-x: hidden; position: absolute; transform: translate(-30px, -30px); height: calc(100% - 60px) }
-    #homepage > div > ul { width: calc(100% - 60px); max-width: 700px; transform: translateX(-50%); margin: 20px 0 10px 50%; padding: 0 }
-    #homepage > div > ul:first-of-type { max-width: 1400px }
-    #homepage > div > ul:first-of-type > li { list-style-type: none; width: calc(33% - 10px); margin: 5px; display: inline-block; background-color: var(--background-color-3rd); padding: 15px; border-radius: 10px; font-size: 20px; cursor: pointer; overflow: hidden; white-space: nowrap }
-    #homepage > div > ul:first-of-type > li > a { margin-left: 10px }
-    #homepage > div > ul:first-of-type > li > img { border-radius: 5px }
-    #homepage > div > ul:last-of-type { max-width: 700px }
-    #homepage > div > ul:last-of-type > li { list-style-type: none; width: 100%; background-color: var(--background-color-3rd); margin: 10px 0; padding: 10px; border-radius: 10px; display: block; padding: 15px 45px }
-    #homepage > div > ul:last-of-type > li > hr { border: 1px solid var(--background-color-4th) }
-    #homepage > div > ul:last-of-type> li > span { font-size: 18px }
-    #homepage > div > ul:last-of-type > li > span > img { border-radius: 5px }
-    
-    @media (max-width: 1200px) {
-        #homepage > div > ul:first-of-type > li { width: calc(50% - 10px) }
-    }
-    @media (max-width: 800px) {  
-        #homepage > div { height: calc(100% - 90px) }
-        #homepage > div > ul { width: calc(100% - 30px) }
-    }
-    @media (max-width: 750px) {  
-        #homepage > div > ul:first-of-type > li { width: calc(100% - 15px) }
-        #homepage > div > ul:last-of-type > li { width: 100% }
-    }
+    .p .not-logged h1 { margin: 0; display: inline-block }
+    .p .not-logged span { font-size: 1.1em }
+
+    .p .logged .quiet b, .p .not-logged > span > b { color: var(--bg-color-text-button); text-decoration: underline 2px; cursor: pointer }
+    .p .logged .quiet { text-align: center }
+
+    .p .load-more { width: 50%; margin: 10px auto; display: block }
 </style>
+
 <script>
-    var hp = Object.assign(by.id('homepage'), {
-        posts: by.selector('#homepage > div > ul:last-of-type'),
-        users: by.selector('#homepage > div > ul:first-of-type')
+    Object.assign(p, {
+        loadMore: p.querySelector('.load-more'),
+        list: p.querySelector('.posts-list'),
     })
-    fetchJSON(backEndUrl + 'homepage', true).then(async ([json, ok]) => {
-        if (ok) {
-            var users = json.posts.map(i => i.sender_id).concat(json.users), clearedUsers = []
-            users.map(i => !clearedUsers.includes(i) ? clearedUsers.push(i) : '')
-            await getUsers(json.users); users = (await getUsers(json.users))
-            for (let post of json.posts) hp.posts.appendChild(postElement(await getUsers([post.sender_id]), post))
-            for (let username of Object.keys(users)) {
-                let user = users[username]
-                let userElem = document.createElement('li'); userElem.className = 'icon'
-                userElem.img = document.createElement('img'), userElem.img.src = avatarUrl(user.id, user.avatar)
-                userElem.a = document.createElement('a'), userElem.a.innerText = `@${username}${getFlag(user.flags, 'mod') ? '*' : ''}`
-                userElem.appendChild(userElem.img); userElem.appendChild(userElem.a)
-                userElem.onclick = () => redirect(`/@${username}`, username)
-                hp.users.appendChild(userElem)
-            }
+
+    p.querySelector('.p .not-logged').style.display = ['block', 'none'][+session.logged]
+    p.querySelector('.p .logged').style.display = ['none', 'block'][+session.logged]
+
+    if (p.posts && p.posts.length) {
+        p.querySelector('.p .quiet').remove()
+        for (post of p.posts) p.list.appendChild(metw.gui.post(post))
+        if (!!(p.posts.length % 20)) p.loadMore.remove()
+        p.loadMore.onclick = async () => {
+            if (!!(p.posts.length % 20)) p.loadMore.remove()
+            var posts = await p.render(p.posts.length)
+            for (let post of posts) p.list.appendChild(metw.gui.post(post))
+            p.posts.push(...posts)
         }
-    })
+    }
 </script>

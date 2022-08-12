@@ -1,2 +1,0 @@
-﻿var pathname = window.location.pathname.split("/"), search = { "args": [], "kwargs": {} }, search_ = window.location.search.substring(1).split("&"); pathname.shift()
-for (let x = 0; x < search_.length; x++) { a = search_[x].split("="); if (a.length == 1) { search.args.push(a[0]) } else { search.kwargs[a[0]] = a[1] } }; delete search_

@@ -1,0 +1,44 @@
+﻿<body>
+    <form class="center bd" action="javascript:p.submit()">
+        <span class="x-center">Title</span><br /><br />
+        <input class="bd" placeholder="kullanıcı adı" name="username" oninput="filteredInput(event, /[\w\d-]*/g, 20)">
+        <input class="bd" placeholder="şifre" type="password" name="password" oninput="filteredInput(event, /[\s\S]*/g, 128)">
+        <input class="bd" placeholder="şifreyi onayla" type="password" name="confirm-password" oninput="filteredInput(event, /[\s\S]*/g, 128)">
+        <div id="gatewayCaptcha" class="g-recaptcha" data-sitekey="6LesMlYhAAAAAGyh8JzrNxbi0DsFTFnyxzLeecXt" data-theme="dark"></div>
+        <input class="bd" type="submit" value=" > ">
+    </form>
+</body>
+
+<style>
+    .p form { width: 75%; max-width: 500px; background-color: var(--bg-color-3); padding: 40px; border-radius: 10px; margin: 0 }
+    .p form span { font-size: 24px }
+    .p form input { margin: 5px 0; font-size: 20px; background-color: inherit; display: block; width: 100% }
+    .p form input:-webkit-autofill { -webkit-box-shadow: 30px 30px 30px 30px var(--bg-color-2) inset !important; -webkit-text-fill-color: var(--color) }
+    .p form input:last-of-type { width: unset; margin: 10px auto 0 auto }
+    .p form input:last-of-type:hover { filter: brightness(110%) }
+    .p form input:last-of-type:active { filter: brightness(120%) }
+    #gatewayCaptcha { margin-top: 10px; max-width: 100%; overflow: auto hidden }
+    #gatewayCaptcha > div { margin: auto }
+</style>
+
+<script>
+    p.form = p.querySelector('form')
+    p.querySelector('form span').innerHTML = pathname[0][0].toUpperCase() + pathname[0].substring(1)
+
+    if (pathname[0] == 'giriş') d.getElementById('gatewayCaptcha').style.display = p.form['confirm-password'].style.display = 'none'
+    else { if (grecaptcha && grecaptcha.render) grecaptcha.render(d.getElementById('gatewayCaptcha')) }
+     
+    p.submit = async () => {
+        if (p.form.username.value.length < 4) return alert.error('Kullanıcı adı 4 karakterden kısa olamaz')
+        if (p.form.password.value.length < 4) return alert.error('Şifre 4 karakterden kısa olamaz')
+        p.form.data = new FormData(p.form)
+        if (pathname[0] == 'katıl') {
+            var captcha = p.form.data.get('g-recaptcha-response')
+            if (p.form.password.value != p.form['confirm-password'].value) return alert.error('Şifreler uyuşmuyor')
+        }
+        loadingBar(true); [json, ok] = await fetch.json(url.backend + ['login', 'signup'][+(pathname[0] == 'katıl')], { method: 'post', body: { username: p.form.username.value, password: p.form.password.value, captcha: captcha ? captcha : '' } }); loadingBar(false)
+        if (ok) { token = json.token; localStorage.setItem('token', token); login(json.token); redirect('/', 'Ana Sayfa') }
+        else alert.error(json[0])
+        if (pathname[0] == 'katıl') grecaptcha.reset(d.getElementById('gatewayCaptcha'))
+    }
+</script>
