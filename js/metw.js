@@ -231,7 +231,7 @@ class Post {
     }
     async getComments(offset, count) {
         var [comments, ok] = await asyncRequest({ path: `comments?offset=${offset == undefined ? 0 : offset}&id=${this.id}&type=1&deep=true&count=${!!count}` })
-        if (count) this.comment_count = comments[1], comments = comments[0], this.indexed.comments = []
+        if (count) comments = comments[0], this.indexed.comments = []
         if (!ok) return false
         await this._session.getUsers(comments.map(comment => comment.user_id))
         for (let _comment = 0; _comment < comments.length; _comment++) {
