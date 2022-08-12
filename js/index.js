@@ -68,7 +68,7 @@ fetch.stream = async (url, progress, fetchInit) =>
                         progress(parseInt(downloadLength / contentLenght * 100))
                         return pump()
                     })
-        } } }) }).then(stream => new Response(stream))
+        } } }) }).then(stream => { progress(100); return new Response(stream) })
 fetch.json = (input, fetchInit) => {
     var init = fetchInit, ok, raw
     if (init.body) init.headers = { 'Content-Type': 'application/json', ...(init.headers ? init.headers : {}) }, init.body = JSON.stringify(init.body)
