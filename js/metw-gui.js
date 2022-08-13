@@ -89,7 +89,7 @@
             var response = await withLoading(async () => comment.reply(content.value))
             if (response) {
                 var commentData = new Comment({ id: response, user: session.user, parent_id: comment.id, content: content.value, date: new Date(), flags: null, reply_count: 0, type: 2, depth: comment.depth + 1, session: session })
-                replies.insertBefore(this.comment(commentData), replies.querySelector('div:first-of-type'))
+                replies.insertBefore(this.comment(commentData), loadMore)
                 comment.replies.push(commentData)
                 content.value = '', writeReply.style.display = 'none', replyState = false, replyButton.querySelector('b').innerText = 'yanılta'
             }
@@ -110,7 +110,7 @@
         var loadMore = _comments.querySelector('.load-more'),
             list = _comments.querySelector('.comments-list')
         loadMore.style.display = ['none', 'block'][+(data.comment_count > indexed.comments.length)]
-        loadMore.onclick = async() => {
+        loadMore.onclick = async () => {
             for (comment of (await service.getComments(indexed.comments.length)).map(comment => this.comment(comment))) list.insertBefore(comment, loadMore)
             loadMore.style.display = ['none', 'block'][+(indexed.comments.length < data.comment_count)]
         }
