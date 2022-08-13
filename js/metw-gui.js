@@ -120,7 +120,7 @@
             var response = await withLoading(async () => service.comment(content.value))
             if (response) {
                 var commentData = new Comment({ id: response, user: session.user, parent_id: data.id, content: content.value, date: new Date(), flags: null, reply_count: 0, type: 0, depth: 0, session: session })
-                list.insertBefore(this.comment(commentData), list.querySelector('div:first-of-type'))
+                list.insertBefore(this.comment(commentData), list.firstChild)
                 indexed.comments.push(commentData)
                 content.value = ''
             }
