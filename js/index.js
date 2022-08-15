@@ -103,7 +103,7 @@ const uri = {
                 })())
             d.getElementById('page').parentNode.replaceChild(p, d.getElementById('page')); page.id = 'page'
             mouse.enable()
-        } else { pageData[name] = await fetch.stream(`/pages/${name}`, progressBar).then(res => res.text()); this.render(name) }
+        } else { pageData[name] = await fetch.stream(`/pages/${name}`, progressBar).then(res => res.text()); await this.render(name) }
     },
     async load() {
         [pathname, search] = this.format()
