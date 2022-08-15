@@ -1,2 +1,3 @@
 # ptb.metw.cc
-açık kaynaklı sosyal medya sitesi
+
+A open source social media site, no idea why made for
