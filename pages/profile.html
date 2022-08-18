@@ -1,8 +1,8 @@
 ﻿<script init>
     p.username = pathname[0].substring(1)
-    p.user = await session.getUser(p.username, true)
-    p.isLoggedUser = session.user && p.user.username == session.user.username
-    await p.user.getPosts(0)
+    p.user = await session.get('user', p.username)
+    p.isLoggedUser = p.username == session.user.name
+    p.postsIds = await p.user.get('posts', (parseInt(search.kwargs.sayfa) - 1 || 0) * 15)
     resolve()
 </script>
 
@@ -12,7 +12,7 @@
             <div class="banner"> </div>
             <div>
                 <div class="user">
-                    <div class="pp-div">
+                    <div class="avatar">
                         <img class="pp bd" />
                         <div class="change-pp"><span class="bd bg-1">değiştir</span></div>
                     </div>
@@ -66,8 +66,8 @@
 
     /* #region PROFILE */
     .p > .profile .user > * { display: inline-block; height: 100px; width: 100% }
-    .p > .profile .pp-div { margin-left: 10px; flex-shrink: 0; flex: 80px; display: flex; align-content: center; margin: auto; display: grid; padding: 5px 0 5px 5px}
-    .p > .profile .pp-div > * { width: 100%; height: 100%; margin: auto; border-radius: 50%; border-width: 3px !important; grid-column: 1; grid-row: 1 }
+    .p > .profile .avatar { margin-left: 10px; flex-shrink: 0; flex: 80px; display: flex; align-content: center; margin: auto; display: grid; padding: 5px 0 5px 5px}
+    .p > .profile .avatar > * { width: 100%; height: 100%; margin: auto; border-radius: 50%; border-width: 3px !important; grid-column: 1; grid-row: 1 }
     .p > .profile .change-pp { background-color: rgba(0 0 0 / 0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; opacity: 0; transition: .1s }
     .p > .profile .change-pp span { height: 30px; line-height: 30px; border-radius: 5px; display: flex; align-items: center }
     .p > .profile .change-pp:hover { opacity: 1 }
@@ -119,7 +119,7 @@
     @media (max-width: 580px){
         .p > .profile { height: 210px }
         .p > .profile .user { flex-wrap: wrap; height: 140px }
-        .p > .profile .user .pp-div { height: 64px; width: 64px; flex: 64px }
+        .p > .profile .user .avatar { height: 64px; width: 64px; flex: 64px }
         .p > .profile .user .details { max-width: calc(100% - 74px) }
         .p > .profile .user .details h1 { font-size: 1.5em}
         .p > .profile .user .details div { max-height: 59px }
@@ -139,7 +139,7 @@
     Object.assign(p, {
         profile:
             Object.assign(p.querySelector('.details'), {
-                username: d.querySelectorAll('.p .username'),
+                username: d.querySelector('.p .username'),
                 bio: p.querySelector('.profile .bio'), bioInput: p.querySelector('.profile .bio-input'),
                 pp: p.querySelector('.profile .pp')
             }),
@@ -170,14 +170,14 @@
     
 
     //#region PROFILE
-    p.querySelector('.profile .banner').style.backgroundImage = `url('${p.user.profile.bannerURL}')`
-    p.profile.pp.src = p.user.profile.avatarURL
-    for (let user of p.profile.username) user.innerText = p.user.fullUsername
-    p.profile.bio.innerText = p.profile.bioInput.value = p.user.profile.bio
+    p.querySelector('.profile .banner').style.backgroundImage = `url('${p.user.bannerURL}')`
+    p.profile.pp.src = p.user.avatarURL
+    p.profile.username.innerText = p.user.displayName
+    p.profile.bio.innerText = p.profile.bioInput.value = p.user.bio
 
     p.profile.bioInput.addEventListener('focusout', async ({ target }) => await withLoading(async () => await session.settings([{ name: 'update_bio', content: p.profile.bioInput.value }])))
     p.following.button.onclick = async () => {
-        await withLoading(async () => p.user.profile.followed ? await p.user.unfollow() : await p.user.follow())
+        await withLoading(async () => p.user.followed ? await p.user.follow(false) : await p.user.follow())
         p.following.update()
     }
     p.querySelector('.change-pp').onclick = async () => p.profile.pp.src = await changeAvatar() 
@@ -192,16 +192,18 @@
 
 
     //#region FOLLOWING LIST
+    p.following.list.before = 0
     p.following.list.render = async (t) => {
         var followers = []
-        followers = await withLoading(async () => t == 'followers' ? await p.user.getFollowers(30, p.following.list.page * 30) : await p.user.getFollowings(30, p.following.list.page * 30))
-        if (p.following.list.page * 30 + 30 > (t == 'followers' ? p.user.profile.follower_count : p.user.profile.following_count)) p.following.list.loadMore.style.display = 'none'
+        followers = await withLoading(async () => await p.user.get(t, p.following.list.before || 0))
+        p.following.list.before = followers.cursor
+        if (p.following.list.page * 30 + 30 > (t == 'followers' ? p.user.followerCount : p.user.followingCount)) p.following.list.loadMore.style.display = 'none'
         else p.following.list.loadMore.style.display = 'block'
-        for (let user of followers) {
+        for (let user of followers.data) {
             if (!user) continue
             let li = d.createElement('li'), username = d.createElement('span'), avatar = d.createElement('img'), div = d.createElement('div')
-            div.className = 'bd', username.innerText = user.fullUsername, avatar.src = user.profile.avatarURL
-            div.onclick = () => redirect(`/@${user.username}`)
+            div.className = 'bd', username.innerText = user.displayName, avatar.src = user.avatarURL
+            div.onclick = () => redirect(`/@${user.name}`)
             div.appendChild(avatar); div.appendChild(username); li.appendChild(div)
             p.following.list.ul.appendChild(li)
         }
@@ -215,6 +217,7 @@
         p.following.list.ul.innerHTML = '', p.following.list.page = 0
         p.following.list.loadMore.style.display = 'none', p.following.list.label.innerText = ['takipçileri', 'takipleri'][+(t == 'followings')]
 
+        p.following.list.before = 0
         await p.following.list.render(t)
         p.following.list.loadMore.onclick = () => { p.following.list.page++; p.following.list.render(t) }
 
@@ -229,28 +232,28 @@
     p.following.followings.onclick = () => p.following.list.f('followings')
     p.following.followers.onclick = () => p.following.list.f('followers')
     p.following.update = () => {
-        p.following.followerCount.innerText = p.user.profile.follower_count
-        p.following.followingCount.innerText = p.user.profile.following_count
+        p.following.followerCount.innerText = p.user.followerCount
+        p.following.followingCount.innerText = p.user.followingCount
         if (p.isLoggedUser) return p.following.button.remove()
-        p.following.button.children[0].style.display = ['none', 'inline-block'][+p.user.profile.followed]
-        p.following.button.children[1].style.display = ['inline-block', 'none'][+p.user.profile.followed]
-        p.following.button.children[2].innerText = ['takip et', 'takipten çık'][+p.user.profile.followed]
-        p.following.button.style.backgroundColor = ['limegreen', 'red'][+p.user.profile.followed]
+        p.following.button.children[0].style.display = ['none', 'inline-block'][+p.user.followed]
+        p.following.button.children[1].style.display = ['inline-block', 'none'][+p.user.followed]
+        p.following.button.children[2].innerText = ['takip et', 'takipten çık'][+p.user.followed]
+        p.following.button.style.backgroundColor = ['limegreen', 'red'][+p.user.followed]
     }
     p.following.update()
     //#endregion
 
 
     //#region POSTS LIST
-    p.posts.render = async (page) => {
-        var posts = await withLoading(async () => await p.user.getPosts(page))
+    p.posts.render = async (page, first) => {
+        var posts = first ? p.postsIds : await withLoading(async () => await p.user.get('posts', page * 15))
         p.posts.list.innerHTML = '', p.posts.page = page
         for (let post of posts) p.posts.list.appendChild(metw.gui.post(post))
 
         p.posts.pages.innerHTML = ''
 
-        p.pageCount = Math.ceil(parseInt(p.user.profile.post_count / 15))
-        if (p.pageCount > 1) {
+        p.pageCount = Math.floor(p.user.postCount / 15)
+        if (p.pageCount >= 1) {
             for (let page = p.pageCount + 1; page >= -1; page--) {
                 let li = d.createElement('li')
                 switch (page) {
@@ -268,6 +271,6 @@
         }
 
     }
-    p.posts.render(parseInt(search.kwargs.sayfa) - 1 || 0)
+    p.posts.render(parseInt(search.kwargs.sayfa) - 1 || 0, true)
     //#endregion
 </script>

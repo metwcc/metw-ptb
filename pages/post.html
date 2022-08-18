@@ -1,6 +1,6 @@
 ﻿<script init>
-    p.post = await session.getPost(pathname[1])
-    p.comments = await metw.gui.comments(p.post, p.post, p.post.indexed)
+    p.post = await session.get('post', pathname[1])
+    p.comments = await metw.gui.comments(p.post, p.post, p.post.indexed, p.post.id)
     resolve()
 </script>
 

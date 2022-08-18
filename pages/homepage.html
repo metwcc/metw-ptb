@@ -1,26 +1,13 @@
 ﻿<script init>
-    p.posts = []
-    p.render = async (offset) => {
-        var data = await session.homepage(offset), posts = []
-        await session.getUsers(data.map(i => i.user_id))
-        for (i of data)
-            posts.push(new metw.Post({ ...i, user: await session.getUser(i.user_id), session: session }))
-        return posts
-    }
-    if (session.logged) p.posts = await p.render(0)
+    if (session.logged) p.posts = await session.homepage()
     resolve()
 </script>
 
 <body>
     <div class="not-logged">
-        <h1>ptb.<b>metw</b>.cc</h1> - dünyanın en iyi web sitesi<br />
+        <h2><a class="subdomain"></a><b>metw</b>.cc</h2> - dünyanın en iyi web sitesi<br />
         <br />
         <span><b onclick="redirect('/giriş')">Giriş yapın</b>, <b onclick="redirect('/katıl')">kaydolun</b> veya <b onclick="redirect('/keşfet')">keşfedin</b></span>
-        <br />
-        <br />
-        <br />
-        <br />
-        <span lang="en">(still no english support, but i have plans to add)</span>
     </div>
     <div class="logged">
         <div class="quiet">
@@ -33,13 +20,14 @@
 </body>
 
 <style>
-    .p .not-logged h1 { margin: 0; display: inline-block; font-weight: normal }
+    .p .not-logged h2 { margin: 0; display: inline-block; font-weight: normal; font-size: 1.7em }
     .p .not-logged span { font-size: 1.1em }
 
     .p .logged .quiet b, .p .not-logged > span > b { color: var(--bg-color-text-button); text-decoration: underline 2px; cursor: pointer }
     .p .logged .quiet { text-align: center }
-
+    
     .p .load-more { width: 50%; margin: 10px auto; display: block }
+    .p .posts-list { margin-top: 0 }
 </style>
 
 <script>
@@ -51,15 +39,15 @@
     p.querySelector('.p .not-logged').style.display = ['block', 'none'][+session.logged]
     p.querySelector('.p .logged').style.display = ['none', 'block'][+session.logged]
 
-    if (p.posts && p.posts.length) {
+    if (p.posts?.length) {
         p.querySelector('.p .quiet').remove()
         for (post of p.posts) p.list.appendChild(metw.gui.post(post))
-        if (!!(p.posts.length % 20)) p.loadMore.remove()
+        if (!!(p.posts.length % 30)) p.loadMore.remove()
         p.loadMore.onclick = async () => {
-            if (!!(p.posts.length % 20)) p.loadMore.remove()
-            var posts = await p.render(p.posts.length)
+            var posts = await session.homepage(p.posts.slice(-1)[0].id)
             for (let post of posts) p.list.appendChild(metw.gui.post(post))
             p.posts.push(...posts)
+            if (!!(p.posts.length % 30)) p.loadMore.remove()
         }
     } else p.loadMore.remove()
 </script>

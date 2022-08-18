@@ -58,8 +58,8 @@
         password: p.querySelectorAll('.password input')
     })
 
-    p.avatar.src = session.user.profile.avatarURL
-    p.banner.src = session.user.profile.bannerURL
+    p.avatar.src = session.user.avatarURL
+    p.banner.src = session.user.bannerURL
 
     p.querySelector('.avatar .change').onclick = async () => p.avatar.src = await changeAvatar()
     p.querySelector('.avatar .remove').onclick = async () => p.avatar.src = await removeAvatar()

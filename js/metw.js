@@ -1,265 +1,216 @@
-﻿/* headers = { }
- * method = 'get'
- * body
- * token
- * hostname = url.backend
- * path 
- */
+﻿class Session {
+    constructor(SID) {
+        this.SID = SID
+        this.user = { id: 0 }
+        this.indexed = { users: [], posts: [], comments: [], rawComments: [] }
+    }
+    async event(name) {
+        if (this['on' + name]) this['on' + name]()
+    }
 
-function request(options) {
-    var headers = {}, body = null
-    if (options.headers) headers = { ...headers, ...options.headers }
-    if (options.json) body = JSON.stringify(options.json), headers['content-type']  = 'application/json'
-    if (options.auth) headers.auth = options.auth
-    const request = new XMLHttpRequest();
-    request.open(options.method || 'get', url.backend + options.path, false)
-    for (var header of Object.keys(headers)) request.setRequestHeader(header, headers[header])
-    try { request.send(body) } catch { metw.errorHandler() }
-    return [JSON.parse(request.responseText), request.status === 200]
-}
-async function asyncRequest(options) {
-    var headers = {}, body
-    if (options.headers) headers = { ...headers, ...options.headers }
-    if (options.json) body = JSON.stringify(options.json), headers['content-type'] = 'application/json'
-    if (options.auth) headers.auth = options.auth
-    var raw, ok
-    return await fetch(url.backend + options.path, { method: options.method || 'get', headers: headers, body: body }).then(res => { ok = res.ok, raw = res; return res.json() }).then(json => [json, ok, raw]).catch(error => metw.errorHandler())
-}
+    async request(options) {
+        return new Promise(async resolve => {
+            var headers = {}, body
+            if (options.headers) headers = { ...headers, ...options.headers }
+            if (options.json) body = JSON.stringify(options.json), headers['content-type'] = 'application/json', options.method = 'post'
+            if (this.SID) headers.SID = this.SID
+            var raw, ok, res = await fetch(url.backend + options.path, { method: options.method || 'get', headers: headers, body: body })
+                .then(res => { ok = res.ok, raw = res; return res.json() }).then(json => [json, ok, raw])
+            if (res[2].status == 429 && options.retry != false) setTimeout(async () => resolve(await this.request(options)), (parseInt(res[2].headers.get('RateLimit-Reset'))) * 1000)
+            else resolve(res)
+        })
+    }
 
-class Session {
-    constructor(token) {
-        this.logged = false
-        this.token = token
-        if (this.token) {
-            var [json, ok] = request({ path: 'session', auth: this.token })
-            if (ok) {
-                this.username = json.username, this.id = json.id, this.permissions = json.permissions
-                this.user = new User({ ...json, session: this })
-                this.logged = true
-            }
-            else this.logged = false
-        }
-        this.indexed = { users: [], posts: [] }
-    }
-    async getUser(selector, profile) {
-        var _selector = Number.isInteger(selector) ? ':' + selector : selector,
-            indexed = this.indexed.users.find(user => (Number.isInteger(selector) ? user.id : user.username) == selector)
-        if (this.user && selector == (Number.isInteger(selector) ? this.user.id : this.user.username)) return this.user
-        if (indexed) return indexed
-        var [data, ok] = await asyncRequest({ path: `users/${_selector}${profile ? '/profile' : ''}${this.logged ? '?id=' + this.id : ''}` })
-        return ok ? (() => { var user = new User({ ...data, profile: profile ? data : false, session: this }); this.indexed.users.push(user); return user })() : false
-    }
-    async getUsers(ids) {
-        var idsToFetch = ids.filter(id => !this.indexed.users.some(indexedUser => indexedUser.id == id)).filter((id, index, array) => array.indexOf(id) == index)
-        if (idsToFetch.length == 0) var [data, ok] = [[], true]
-        else var [data, ok] = await asyncRequest({ path: `users/profiles?id=${this.logged ? this.id : 0}`, json: idsToFetch, method: 'post' })
-        if (ok) this.indexed.users.push(...data.map(user => new User({ ...user, profile: user, session: this })))
-        return ok ? (() => { return ids.map(id => this.indexed.users.find(user => user.id == id)) })() : false
-    }
-    async getPost(id) {
-        var [post, ok] = await asyncRequest({ path: `posts/${id}?id=${this.id}` })
-        if (!ok) return false
-        return new Post({ ...post, session: this, user: (await this.getUser(post.user_id)) })
-    }
     async explore() {
-        var [data, ok] = await asyncRequest({ path: `explore?id=${this.logged ? this.id : 0}` })
-        return ok ? data : false
+        return await this.bulkGet((await this.request({ path: '/explore' }))[0])
     }
-    async homepage(offset) {
-        var [data, ok] = await asyncRequest({ path: `homepage?id=${this.logged ? this.id : 0}&offset=${offset}` })
-        return ok ? data : false
+    async homepage(before) {
+        return await this.bulkGet('posts', (await this.request({ path: `/homepage?id=${this.user.id}&before=${before ? before : 0}` }))[0])
     }
+
     async settings(actions) {
-        var [responses, ok] = await asyncRequest({ path: 'settings', json: actions, method: 'post', auth: this.token })
+        var [responses, ok] = await this.request({ path: '/settings', json: actions })
         var resp = {}
         for (var response of Object.keys(responses))
             switch (response) {
-                case 'remove_avatar': if (this.user._profile) this.user._profile.avatar = 0; break
-                case 'remove_banner': if (this.user._profile) this.user._profile.banner = 0; break
-                case 'update_bio': if (this.user._profile) this.user._profile.bio = actions.find(action => action.name == 'update_bio').content; break
+                case 'remove_avatar': this.user.avatar = 0; break
+                case 'remove_banner': this.user.banner = 0; break
+                case 'update_bio': this.user.bio = actions.find(action => action.name == 'update_bio').content; break
                 case 'change_password':
-                    if (responses['change_password'][1]) this.token = responses['change_password'][0]
+                    if (responses['change_password'][1]) this.SID = responses['change_password'][0]
                     resp['change_password'] = responses['change_password'][1]
                     break
             }
         return resp
     }
-    async post(content, type, parentId) {
-        var [resposne, ok] = await asyncRequest({ path: 'posts', json: { content: content, parent_id: parentId != undefined ? parentId : 0, type: type != undefined ? type : 0 }, method: 'post', auth: this.token  })
-        return ok ? (() => {
-            if (!type) {
-                this.user.indexed.posts = []
-                this.user.profile.post_cout++
+    async upload(param, base64) {
+        var [_new, ok] = await this.request({ path: `/upload/${param}`, json: { base64: base64 } })
+        return ok ? (() => { this.user[param] = _new; return _new })() : ok
+    }
+
+    async signup(username, password, captcha) {
+        var [SID, ok] = await this.request({ path: '/signup', json: { username: username, password: password, captcha: captcha } })
+        if (!ok) return SID; this.SID = SID; return await this.connect()
+    }
+    async login(username, password) {
+        var [SID, ok] = await this.request({ path: '/login', json: { username: username, password: password } })
+        if (!ok) return SID; this.SID = SID; return await this.connect()
+    }
+    async connect(SID) {
+        if (SID) this.SID = SID
+        var [session, ok] = await this.request({ path: '/session', headers: { SID: this.SID } })
+        if (ok) {
+            this.user = new User(session, this)
+            this.indexed = { users: [this.user], posts: [], comments: [], rawComments: [] }
+        }
+        this.logged = ok
+        this.event(ok ? 'login' : 'loginfailed')
+        return this.SID
+    }
+    async disconnect() {
+        this.indexed = { users: [], posts: [], comments: [], rawComments: [] }
+        this.logged = false, this.SID = undefined
+        this.event('logout')
+    }
+    async post(content) {
+        var [id, ok] = await this.request({ path: '/posts', json: { content: content } })
+        if (ok) this.indexed.posts.push(new Post({
+            id: id, user_id: this.user.id, user: this.user,
+            like_count: 0, comment_count: 0, liked: false, sent_on: new Date(),
+            content: content, flags: 0
+        }, session))
+        return ok
+    }
+
+    async index(data) {
+        for (let key of Object.keys(data)) {
+            if (key != 'users') await this.bulkGet('users', data[key].map(d => d.user_id))
+            var _data = []
+            for (let d of data[key]) {
+                if (key != 'users') var user = await this.get('user', d.user_id)
+                _data.push(eval(`new ${key.charAt(0).toUpperCase() + key.slice(1, -1)}({ ...d, user: ${key != 'users' ? 'user' : undefined} }, this)`))
             }
-            return resposne
-        })() : false
+            this.indexed.rawComments.push(..._data)
+            if (key == 'comments') {
+                _data.forEach(comment => { if (comment.type == 2) this.indexed.rawComments.find(parent => parent.id == comment.parentId && parent.replies?.every(reply => reply.id != comment.id))?.replies.push(comment) })
+                _data = _data.filter(comment => comment.type != 2)
+            }
+            this.indexed[key].push(..._data)
+        }
+
     }
-    async changeAvatar(base64) {
-        var [newAvatar, ok] = await asyncRequest({ path: 'upload/avatar', method: 'post', auth: token, json: { base64: base64 } })
-        if (ok) this.user._profile.avatar = newAvatar
-        return ok ? newAvatar : ok
+    async get(param, selector) {
+        var user = this.indexed.users.find(typeof selector == 'number' || param != 'user' ? data => data.id == selector : user => user.name == selector)
+        return user ? user :
+            await (async () => {
+                var [data, ok] = await this.request({ path: `/${param}s/${typeof selector == 'number' && param == 'user' ? ':' : ''}${selector}?id=${this.user.id}` })
+                if (!ok) return false
+                if (param != 'user') var user = await this.get('user', data.user_id)
+                data = eval(`new ${param.charAt(0).toUpperCase() + param.substring(1)}({ ...data, user: ${param != 'user' ? 'user' : undefined} }, this)`)
+                this.indexed[param + 's'].push(data)
+                return data
+            })()
     }
-    async changeBanner(base64) {
-        var [newBanner, ok] = await asyncRequest({ path: 'upload/banner', method: 'post', auth: token, json: { base64: base64 } })
-        if (ok) this.user._profile.banner = newBanner
-        return ok ? newBanner : ok
+    async bulkGet(param, ids) {
+        if (!Array.isArray(ids)) {
+            var _param = { ...param }, response = {}
+            for (let key of Object.keys(_param))
+                _param[key] = _param[key].slice(0, 50).filter((id, index, array) => array.indexOf(id) == index && !this.indexed[key].some(data => data.id == id))
+            if (Object.values(_param).some(v => v.length)) var [data, ok] = await this.request({ path: `/bulk?id=${this.user.id}`, json: _param })
+            if (ok) await this.index(Array.isArray(data) ? { [Object.keys(_param)[0]]: data } : data)
+            Object.keys(param).forEach(key => response[key] = param[key].map(id => this.indexed[key].find(i => i.id == id)).filter(i => !!i))
+            return response
+        }
+        var _ids = ids.slice(0, 100).filter((id, index, array) => array.indexOf(id) == index && !this.indexed[param].some(data => data.id == id))
+        if (_ids.length) var [data, ok] = await this.request({ path: `/${param}/bulk?id=${this.user.id}`, json: _ids })
+        if (ok) await this.index({ [param]: data })
+        return ids.map(id => this.indexed[param].find(i => i.id == id)).filter(i => !!i)
     }
 }
 
 class User {
-    constructor(data) {
-        this.username = data.username, this.id = data.id
-        this.permissions = data.permissions
-        this._session = data.session
-        this._profile = data.profile ? data.profile : false
-        this.indexed = { posts: { } }
+    constructor(data, session) {
+        this.id = data.id, this.name = data.name
+        this.avatar = data.avatar, this.banner = data.banner
+        this.joinTimestamp = new Date(data.join_timestamp), this.lastOnline = data.last_online ? new Date(data.last_online) : new Date()
+        this.followingCount = parseInt(data.following_count), this.followerCount = parseInt(data.follower_count), this.postCount = parseInt(data.post_count)
+        this.flags = data.flags, this.permissions = data.permissions, this.followed = data.followed
+        this.bio = data.bio
+        this.comments = []
+        this._session = session
     }
-    get profile() {
-        return {
-            ...(this._profile != false ? this._profile : this._profile = request({ path: `users/:${this.id}/profile?id=${this._session ? this._session.id : ''}` })[0]),
-            get avatarURL() { return url.cdn + `${this.avatar == 0 ? 'assets/avatars/1' : 'usercontent/' + this.id + '/0' + this.avatar}` },
-            get bannerURL() { return this.banner == 0 ? 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' : url.cdn + 'usercontent/' + this.id + '/1' + this.banner }
+
+    get displayName() { return '@' + this.name }
+    get avatarURL() { return url.cdn + `${!this.avatar ? '/assets/avatars/1' : '/usercontent/' + this.id + '/0' + this.avatar}` }
+    get bannerURL() { return !this.banner ? 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' : url.cdn + '/usercontent/' + this.id + '/1' + this.banner }
+
+    async follow(follow = true) {
+        var [response, ok] = await this._session.request({ path: `/users/:${this.id}/${!follow ? 'un' : ''}follow` }), done = response && ok
+        if (done) this.followed = follow, this.followerCount += 1 * (follow ? 1 : -1), this._session.user.followingCount += 1 * (follow ? 1 : -1); return done
+    }
+
+    async get(param, before) {
+        if (param == 'comments') {
+            var comments = await this._session.bulkGet('comments', (await this._session.request({ path: `/comments?type=0&parent_id=${this.id}&before=${before ? before : 0}` }))[0])
+            this.comments.push(...comments)
+            return comments
         }
-    }
-    get fullUsername() {
-        return '@' + this.username
-    }
-    async follow() {
-        var follow = (await asyncRequest({ path: `users/:${this.id}/follow`, auth: this._session.token }))[0]
-        if (!follow) return false
-        if (!!this._profile) { this._profile.follower_count++; this._profile.followed = true }
-        if (!!this._session.user._profile) this._session.user._profile.following_count++
-        return true
-    }
-    async unfollow() {
-        var unfollow = (await asyncRequest({ path: `users/:${this.id}/unfollow`, auth: this._session.token }))[0]
-        if (!unfollow) return false
-        if (!!this._profile) { this._profile.follower_count--; this._profile.followed = false }
-        if (!!this._session.user._profile) this._session.user._profile.following_count--
-        return true
-    }
-    async getFollowers(limit, offset) {
-        var [followers, ok] = (await asyncRequest({ path: `users/:${this.id}/followers?limit=${limit}&offset=${offset}` }))
-        if (!ok) return false
-        return await this._session.getUsers(followers)
-    }
-    async getFollowings(limit, offset) {
-        var [followings, ok] = (await asyncRequest({ path: `users/:${this.id}/followings?limit=${limit}&offset=${offset}` }))
-        if (!ok) return false
-        return await this._session.getUsers(followings)
-    }
-    async getPosts(page) {
-        if (this.indexed.posts[page + '']) return this.indexed.posts[page + '']
-        var [posts, ok] = await asyncRequest({ path: `users/:${this.id}/posts?limit=15&offset=${page * 15}&id=${this._session.id}` })
-        if (!ok) return false
-        return this.indexed.posts[page + ''] = posts.map(post => new Post({ ...post, user: this, session: this._session }))
-    }
-    async getComments(offset, count) {
-        var [comments, ok] = await asyncRequest({ path: `comments?offset=${offset == undefined ? 0 : offset}&id=${this.id}&type=0&deep=true&count=${!!count}` })
-        if (count) this._profile.comment_count = comments[1], comments = comments[0], this.indexed.comments = []
-        if (!ok) return false
-        await this._session.getUsers(comments.map(comment => comment.user_id))
-        for (let _comment = 0; _comment < comments.length; _comment++) {
-            let comment = comments[_comment], user = await this._session.getUser(comment.user_id, true)
-            comments[_comment] = new Comment({ ...comment, reply_count: parseInt(comment.reply_count), session: this._session, user: user })
-        }
-        for (let depth = 1; depth < 3; depth++)
-            comments.forEach((comment) => {
-                if (comment.depth == depth) comments.find((parent_comment) => comment.parent_id == parent_comment.id).replies.push(comment)
-            })
-        comments = comments.filter(comment => comment.depth == 0)
-        this.indexed.comments.push(...comments)
-        return comments
+        var [response, ok] = await this._session.request({ path: `/users/:${this.id}/${param}?limit=30&${param == 'posts' ? 'offset' : 'before'}=${before ? before : 0}` }), cursor,
+            data = await this._session.bulkGet(param == 'posts' ? 'posts' : 'users', response.map((d, i, a) => i == a.length - 1 && Array.isArray(d) ? (() => { cursor = d[1]; return d[0] })() : d))
+        return ok ? (!cursor ? data : { data: data, cursor: cursor }) : []
     }
     async comment(content) {
-        var [response, ok] = await asyncRequest({ path: 'comments', auth: this._session.token, method: 'post', json: { content: content, parent_id: this.id, type: 0 } })
-        return ok ? response : ok
-    }
-}
-
-class Comment {
-    constructor(data) {
-        this.id = data.id
-        this.user = data.user
-        this.parent_id = data.parent_id
-        this.content = data.content
-        this.date = data.date
-        this.flags = data.flags
-        this.reply_count = data.reply_count
-        this.type = data.type
-        this.depth = data.depth
-        this.replies = []
-        this._session = data.session
-        this.comment_count = 0
-        this.comments = []
-    }
-    async reply(content) {
-        var [response, ok] = await asyncRequest({ path: 'comments', auth: this._session.token, method: 'post', json: { content: content, parent_id: this.id, type: 2 } })
-        return ok ? response : ok
-    }
-    async getReplies(offset) {
-        var [replies, ok] = await asyncRequest({ path: `comments?offset=${offset == undefined ? 0 : offset}&id=${this.id}&type=2&deep=true` })
-        if (!ok) return false
-        await this._session.getUsers(replies.map(reply => reply.user_id))
-        for (let _reply = 0; _reply < replies.length; _reply++) {
-            let reply = replies[_reply], user = await this._session.getUser(reply.user_id, true)
-            replies[_reply] = new Comment({ ...reply, reply_count: parseInt(reply.reply_count), session: this._session, user: user })
-        }
-        for (let depth = 1; depth < 3; depth++)
-            replies.forEach((reply) => {
-                if (reply.depth == depth) replies.find((parent_reply) => reply.parent_id == parent_reply.id).replies.push(reply)
-            })
-        replies = replies.filter(reply => reply.depth == 0)
-        this.replies.push(...replies)
-        return replies
+        return (await this._session.request({ path: `/comments?type=0&parent_id=${this.id}`, json: { content: content } }))[0]
     }
 }
 
 class Post {
-    constructor(data) {
-        this.id = data.id
-        this.user = data.user
+    constructor(data, session) {
+        this.id = data.id, this.userId = data.user_id, this.user = data.user
+        this.likeCount = parseInt(data.like_count), this.liked = data.liked
+        this.commentCount = parseInt(data.comment_count)
+        this.sentOn = new Date(data.sent_on)
         this.content = data.content
-        this.date = new Date(data.date)
         this.flags = data.flags
-        this.type = data.type
-        this.loved = data.loved
-        this.love_count = parseInt(data.love_count)
-        this.comment_count = parseInt(data.comment_count)
-        this.indexed = { comments: [] }
-        this._session = data.session ? data.session : false
+        this.comments = []
+        this._session = session
     }
-    async getComments(offset, count) {
-        var [comments, ok] = await asyncRequest({ path: `comments?offset=${offset == undefined ? 0 : offset}&id=${this.id}&type=1&deep=true&count=${!!count}` })
-        if (count) comments = comments[0], this.indexed.comments = []
-        if (!ok) return false
-        await this._session.getUsers(comments.map(comment => comment.user_id))
-        for (let _comment = 0; _comment < comments.length; _comment++) {
-            let comment = comments[_comment], user = await this._session.getUser(comment.user_id, true)
-            comments[_comment] = new Comment({ ...comment, reply_count: parseInt(comment.reply_count), session: this._session, user: user })
+    async get(param, before) {
+        if (param == 'comments') {
+            var comments = await this._session.bulkGet('comments', (await this._session.request({ path: `/comments?type=1&parent_id=${this.id}&before=${before ? before : 0}` }))[0])
+            this.comments.push(...comments)
+            return comments
         }
-        for (let depth = 1; depth < 3; depth++)
-            comments.forEach((comment) => {
-                if (comment.depth == depth) comments.find((parent_comment) => comment.parent_id == parent_comment.id).replies.push(comment)
-            })
-        comments = comments.filter(comment => comment.depth == 0)
-        this.indexed.comments.push(...comments)
-        return comments
     }
-    async love() {
-        if (this.loved) return false
-        var [love, ok] = (await asyncRequest({ path: `posts/${this.id}/love`, auth: this._session.token }))
-        return ok && love ? (() => { this.love_count++; this.loved = true; return true })(): false
-    }
-    async unlove() {
-        if (!this.loved) return false
-        var [love, ok] = (await asyncRequest({ path: `posts/${this.id}/unlove`, auth: this._session.token }))
-        return ok && love ? (() => { this.love_count--; this.loved = false; return true })(): false
+    async like(like = true) {
+        var [response, ok] = await this._session.request({ path: `/posts/${this.id}/${!like ? 'un' : ''}like` }), done = response && ok
+        if (done) this.liked = like, this.likeCount += 1 * (like ? 1 : -1); return done
     }
     async comment(content) {
-        var [response, ok] = await asyncRequest({ path: 'comments', auth: this._session.token, method: 'post', json: { content: content, parent_id: this.id, type: 1 } })
-        return ok ? response : ok
+        return (await this._session.request({ path: `/comments?type=1&parent_id=${this.id}`, json: { content: content } }))[0]
     }
 }
 
-metw = { Post: Post, User: User, Session: Session }
+class Comment {
+    constructor(data, session) {
+        this.id = data.id, this.userId = data.user_id, this.user = data.user
+        this.type = data.type; this.parentId = data.parent_id; this.topParentId = data.top_parent_id
+        this.replyCount = parseInt(data.reply_count)
+        this.sentOn = new Date(data.sent_on)
+        this.content = data.content
+        this.flags = data.flags
+        this.replies = []
+        this._session = session
+    }
+    async get(param, before) {
+        if (param == 'replies') {
+            var ids = (await this._session.request({ path: `/comments?type=2&parent_id=${this.id}&before=${before ? before : 0}` }))[0]
+            await this._session.bulkGet('comments', ids)
+            return this.replies.filter(reply => ids.includes(reply.id))
+        }
+    }
+    async reply(content) {
+        return (await this._session.request({ path: `/comments?type=2&parent_id=${this.id}&top_parent_id=${this.type != 2 ? this.parentId : (this.topParentId ? this.topParentId : 0)}`, json: { content: content } }))[0]
+    }
+}
+metw = { Session: Session, User: User, Post: Post }

@@ -1,8 +1,7 @@
 ﻿<script init>
     p.username = pathname[0].substring(1)
-    p.user = await session.getUser(p.username, true)
-    p.isLoggedUser = session.user && p.user.username == session.user.username
-    p.comments = await metw.gui.comments(p.user, p.user._profile, p.user.indexed)
+    p.user = await session.get('user', p.username)
+    p.comments = await metw.gui.comments(p.user)
     resolve()
 </script>
 
@@ -27,7 +26,7 @@
             username: p.querySelector('.mini-profile h1 span')
         })
     })
-    p.profile.username.innerText = p.user.fullUsername
-    p.profile.pp.src = p.user.profile.avatarURL
+    p.profile.username.innerText = p.user.displayName
+    p.profile.pp.src = p.user.avatarURL
     p.appendChild(p.comments)
 </script>

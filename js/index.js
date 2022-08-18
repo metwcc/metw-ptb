@@ -1,9 +1,11 @@
-﻿const url = { backend: 'https://api.metw.cc/ptb/', cdn: 'https://cdn.metw.cc/' }
-const d = document, w = window
-const pageData = {}
+﻿const d = document, w = window
+var url = { backend: 'http://192.168.1.200/api', cdn: 'https://cdn.metw.cc/utb', ws: 'ws://192.168.1.200/api/ws', subdomain: w.location.host.split('.')[0] }
 var pathname, search
-var p, page
-var session, token
+var p, page, indexedPages = {}
+var session, SID
+
+if (url.subdomain == 'ptb') url = { ...url, backend: 'https://api.metw.cc/ptb', cdn: 'https://cdn.metw.cc', ws: 'wss://api.metw.cc/ptb/ws' }
+for (let element of d.getElementsByClassName('subdomain')) element.innerHTML = url.subdomain + '.'
 
 const AsyncFunction = (async function () { }).constructor;
 const mouse = {
@@ -18,7 +20,7 @@ const progressBar = (percentage) => {
     else bar.style.height = '2px'
     bar.style.width = percentage + '%'
 }
-const withLoading = async (cb) => { loadingBar(true); var r = (await cb()); loadingBar(false); return r }
+const withLoading = async (cb) => { loadingBar(true); var r = await cb(); loadingBar(false); return r }
 const loadingBar = (state) => {
     var bar = d.getElementById('loading-bar')
     bar.style.animation = null
@@ -86,14 +88,14 @@ const uri = {
         if (window.location.search.startsWith('?/')) window.history.pushState(null, '', window.location.search.substring(2).replace('&', '?')); return [pathname, search]
     },
     async render(name) {
-        if (Object.keys(pageData).includes(name)) {
+        if (Object.keys(indexedPages).includes(name)) {
             mouse.disable()
             var scripts = [[], []]
             p = page = d.createElement('div'), page.className = 'page p mx-auto'
-            pageData[name].replace(/<script([^>]*?)>([\s\S]*?)<\/script>/g, (raw, attributes, innerHTML) => { scripts[+!attributes.split(' ').includes('init')].push([attributes.split(' '), innerHTML]); return '' })
+            indexedPages[name].replace(/<script([^>]*?)>([\s\S]*?)<\/script>/g, (raw, attributes, innerHTML) => { scripts[+!attributes.split(' ').includes('init')].push([attributes.split(' '), innerHTML]); return '' })
             await withLoading(async () => { for (script of scripts[0]) await new Promise(resolve => { eval(`(async resolve => { ${script[1]} })`)(resolve) }) })
-            var style = [...pageData[name].matchAll(/<style[^>]*?>([\s\S]*?)<\/style>/g)][0]
-            page.innerHTML = [...pageData[name].matchAll(/<body[^>]*?>([\s\S]*?)<\/body>/g)][0][1] + (style ? style[0] : '')
+            var style = [...indexedPages[name].matchAll(/<style[^>]*?>([\s\S]*?)<\/style>/g)][0]
+            page.innerHTML = [...indexedPages[name].matchAll(/<body[^>]*?>([\s\S]*?)<\/body>/g)][0][1] + (style ? style[0] : '')
             for (let script of scripts[1])
                 page.appendChild((() => {
                     let elem = d.createElement('script')
@@ -102,22 +104,23 @@ const uri = {
                     return elem
                 })())
             d.getElementById('page').parentNode.replaceChild(p, d.getElementById('page')); page.id = 'page'
+            for (let element of d.getElementsByClassName('subdomain')) element.innerHTML = url.subdomain + '.'
             mouse.enable()
-        } else { pageData[name] = await fetch.stream(`/pages/${name}`, progressBar).then(res => res.text()); await this.render(name) }
+        } else { indexedPages[name] = await fetch.stream(`/pages/${name}`, progressBar).then(res => res.text()); await this.render(name) }
     },
     async load() {
         [pathname, search] = this.format()
-        if (pathname.length == 0) return await this.render('homepage.html')
-        if (['giriş', 'katıl'].includes(pathname[0])) return await this.render('gateway.html')
-        if (pathname[0] == 'keşfet') return await this.render('explore.html')
-        if (pathname[0] == 'gönderi') return await this.render('post.html')
-        if (pathname[0] == 'ayarlar') return await this.render('settings.html')
-        if (pathname[0].startsWith('@'))
+        if (pathname.length == 0) await this.render('homepage.html')
+        else if (['giriş', 'katıl'].includes(pathname[0])) await this.render('gateway.html')
+        else if (pathname[0] == 'keşfet') await this.render('explore.html')
+        else if (pathname[0] == 'gönderi') await this.render('post.html')
+        else if (pathname[0] == 'ayarlar') await this.render('settings.html')
+        else if (pathname[0].startsWith('@'))
             switch (pathname[1]) {
-                case 'duvar': return await this.render('wall.html')
-                case undefined: return await this.render('profile.html')
+                case 'duvar': await this.render('wall.html'); break
+                case undefined: await this.render('profile.html')
             }
-        return await this.render('404.html')
+        else this.render('404.html')
     }
 }
 const redirect = async (path, title) => { w.history.pushState(null, title ? title : 'metw.cc', path); await uri.load() }
@@ -125,21 +128,19 @@ const redirect = async (path, title) => { w.history.pushState(null, title ? titl
 
 
 //#region SESSION
-const logout = () => {
-    session = new Session(false)
-    localStorage.removeItem('token')
+session = new Session()
+session.onloginfailed = session.onlogout = () => {
+    localStorage.removeItem('SID')
     Array.from(d.getElementsByClassName('logged')).forEach(i => i.style.display = 'none')
     Array.from(d.getElementsByClassName('non-logged')).forEach(i => i.style.display = 'flex')
 }
-const login = () => {
-    session = new Session(token)
-    if (session.logged) {
-        Array.from(d.getElementsByClassName('logged')).forEach(i => i.style.display = 'flex')
-        Array.from(d.getElementsByClassName('non-logged')).forEach(i => i.style.display = 'none')
-        d.getElementById('user-photo').src = session.user.profile.avatarURL
-        d.getElementById('username').innerHTML = session.username + '&nbsp;'
-    }
-    else logout()
+session.onlogin = async () => {
+    Array.from(d.getElementsByClassName('logged')).forEach(i => i.style.display = 'flex')
+    Array.from(d.getElementsByClassName('non-logged')).forEach(i => i.style.display = 'none')
+    d.getElementById('user-photo').src = session.user.avatarURL
+    d.getElementById('username').innerHTML = session.user.name + '&nbsp;'
+    var [pathname, search] = uri.format()
+    if (['katıl', 'giriş'].includes(pathname[0])) await redirect(`/@${session.user.name}`)
 }
 //#endregion
 
@@ -153,32 +154,32 @@ d.getElementById('compose').onclick = () => {
 d.querySelector('#compose-popup .cancel').onclick = () => d.getElementById('compose-popup').style.display = 'none'
 d.querySelector('#compose-popup .send').onclick = async () => {
     var content = d.querySelector('#compose-popup textarea').value
-    if (!content || content.match(/\S+/g).join('').length < 4) return alert.error('Gönderi içeriği 4 karakterden kısa olamaz')
+    if (!content || content.match(/[\S]*/g).join('').length < 2) return alert.error('Gönderi içeriği 3 karakterden kısa olamaz')
     if (await withLoading(async () => await session.post(content))) {
         d.getElementById('compose-popup').style.display = 'none'
-        try { await p.posts.render(0) } catch { }
+        if (p.isLoggedUser) await p.posts.render(0)
     }
     else alert.error('Çok hızlı gönderi gönderiyorsunuz! Birazdan tekrar deneyin.')
 }
 async function changeAvatar() {
     var avatar = await crop.start('1:1', '128x128')
-    await withLoading(async () => await session.changeAvatar(avatar))
-    d.getElementById('user-photo').src = session.user.profile.avatarURL
-    return session.user.profile.avatarURL
+    await withLoading(async () => await session.upload('avatar', avatar))
+    d.getElementById('user-photo').src = session.user.avatarURL
+    return session.user.avatarURL
 }
 async function changeBanner() {
     var banner = await crop.start('16:9', '640x360')
-    await withLoading(async () => await session.changeBanner(banner))
-    return session.user.profile.bannerURL
+    await withLoading(async () => await session.upload('banner', banner))
+    return session.user.bannerURL
 }
 async function removeAvatar() {
     await withLoading(async () => session.settings([{ name: 'remove_avatar' }]))
-    d.getElementById('user-photo').src = session.user.profile.avatarURL
-    return session.user.profile.avatarURL
+    d.getElementById('user-photo').src = session.user.avatarURL
+    return session.user.avatarURL
 }
 async function removeBanner() {
     await withLoading(async () => session.settings([{ name: 'remove_banner' }]))
-    return session.user.profile.bannerURL
+    return session.user.bannerURL
 }
 //#endregion
 
@@ -244,10 +245,8 @@ w.onresize = () => {
 }
 w.onpopstate = () => uri.load()
 w.onload = (async () => {
-    token = localStorage.getItem('token')
-    metw.errorHandler = () => true //window.location.replace('/hata')
-    if (token) login()
-    else logout()
+    SID = localStorage.getItem('SID')
+    await session.connect(SID)
     await uri.load()
     setTimeout(() => {
         var loadingScreen = {
