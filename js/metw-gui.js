@@ -86,11 +86,9 @@
         _comment.querySelector('.send-reply').onclick = async () => {
             var content = _comment.querySelector('.write-reply textarea')
             if (!content.value || content.value.match(/\S+/g).join('').length < 4) return alert.error('Yanıt 4 karakterden kısa olamaz')
-            var response = await withLoading(async () => comment.reply(content.value))
-            if (response) {
-                var commentData = new Comment({ id: response, user: session.user, parent_id: comment.id, top_parent_id: (comment.type == 2 ? comment.topParentId : comment.parentId), content: content.value, sendOn: new Date(), flags: null, replyCount: 0, type: 2 }, session)
-                replies.insertBefore(this.comment(commentData), replies.firstChild)
-                comment.replies.push(commentData)
+            var newReply = await withLoading(async () => comment.reply(content.value))
+            if (newReply) {
+                replies.insertBefore(this.comment(newReply), replies.firstChild)
                 content.value = '', writeReply.style.display = 'none', replyState = false, replyButton.querySelector('b').innerText = 'yanılta'
             }
             else alert.error('Çok hızlı yanıt gönderiyorsunuz! Lütfen birazdan tekrar deneyin.')
@@ -117,11 +115,9 @@
         _comments.querySelector('button').onclick = async () => {
             var content = _comments.querySelector('textarea')
             if (!content.value || content.value.match(/\S+/g).join('').length < 4) return alert.error('Yorum 4 karakterden kısa olamaz')
-            var response = await withLoading(async () => service.comment(content.value))
-            if (response) {
-                var commentData = new Comment({ id: response, user: session.user, parent_id: service.id, content: content.value, sendOn: new Date(), flags: null, replyCount: 0, type: 1 }, session)
-                list.insertBefore(this.comment(commentData), list.firstChild)
-                service.comments.push(commentData)
+            var newComment = await withLoading(async () => service.comment(content.value))
+            if (newComment) {
+                list.insertBefore(this.comment(newComment), list.firstChild)
                 content.value = ''
             }
             else alert.error('Çok hızlı yorum gönderiyorsunuz! Lütfen birazdan tekrar deneyin.')

@@ -160,7 +160,15 @@ class User {
         return ok ? (!cursor ? data : { data: data, cursor: cursor }) : []
     }
     async comment(content) {
-        return (await this._session.request({ path: `/comments?type=0&parent_id=${this.id}`, json: { content: content } }))[0]
+        var comment = new Comment(
+            {
+                id: (await this._session.request({ path: `/comments?type=0&parent_id=${this.id}`, json: { content: content } }))[0],
+                user_id: this._session.user.id, user: this._session.user, parent_id: this.id, type: 1,
+                content: content
+            }, this._session)
+        this.commentCount++
+        this._session.indexed.comments.push(comment); this.comments.unshift(comment)
+        return comment
     }
 }
 
@@ -210,7 +218,15 @@ class Comment {
         }
     }
     async reply(content) {
-        return (await this._session.request({ path: `/comments?type=2&parent_id=${this.id}&top_parent_id=${this.type != 2 ? this.parentId : (this.topParentId ? this.topParentId : 0)}`, json: { content: content } }))[0]
+        var reply = new Comment(
+            {
+                id: (await this._session.request({ path: `/comments?type=2&parent_id=${this.id}&top_parent_id=${this.type != 2 ? this.parentId : (this.topParentId ? this.topParentId : 0)}`, json: { content: content } }))[0],
+                user_id: this._session.user.id, user: this._session.user, parent_id: this.id, top_parent_id: this.top_parent_id, type: 2,
+                content: content
+            }, this._session)
+        this.replyCount++
+        this.replies.unshift(reply)
+        return reply
     }
 }
 metw = { Session: Session, User: User, Post: Post }

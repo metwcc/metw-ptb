@@ -196,6 +196,7 @@
     p.following.list.render = async (t) => {
         var followers = []
         followers = await withLoading(async () => await p.user.get(t, p.following.list.before || 0))
+        if (!followers.data) return
         p.following.list.before = followers.cursor
         if (p.following.list.page * 30 + 30 > (t == 'followers' ? p.user.followerCount : p.user.followingCount)) p.following.list.loadMore.style.display = 'none'
         else p.following.list.loadMore.style.display = 'block'

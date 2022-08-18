@@ -217,7 +217,7 @@ crop.reflow = (reset) => {
     if (reset == true) crop.img.meta = { x: 0, y: 0, landspace: crop.img.offsetWidth > crop.img.offsetHeight, sx: 0, sy: 0, ratio: crop.img.offsetWidth / crop.img.offsetHeight, fixScale: 1 }
     for (let i of ['width', 'height']) crop.img.removeAttribute(i)
     eval(`crop.img.${(crop.img.meta.landspace ? 'width' : 'height')} = (crop.landspace ? crop.frame.offsetWidth : crop.frame.offsetHeight) * crop.zoom.value / 100 * crop.img.meta.fixScale`)
-    crop.img.meta.fixScale *= crop.img.offsetHeight < crop.frame.offsetHeight ? crop.frame.offsetHeight / crop.img.offsetHeight : crop.img.offsetWidth < crop.frame.offsetWidth ? crop.img.meta.fixScale *= crop.frame.offsetWidth / crop.img.offsetWidth : 1
+    crop.img.meta.fixScale *= reset ? crop.img.offsetHeight < crop.frame.offsetHeight ? crop.frame.offsetHeight / crop.img.offsetHeight : crop.img.offsetWidth < crop.frame.offsetWidth ? crop.img.meta.fixScale *= crop.frame.offsetWidth / crop.img.offsetWidth : 1 : 1
     crop.img.meta.sx = crop.img.offsetWidth / 2 - (crop.frame.offsetWidth / 2 - crop.img.meta.x), crop.img.meta.sy = crop.img.offsetHeight / 2 - (crop.frame.offsetHeight / 2 - crop.img.meta.y)
     crop.img.meta.x = crop.img.meta.sx < 0 ? -crop.img.offsetWidth / 2 + crop.frame.offsetWidth / 2 : crop.img.meta.sx + crop.frame.offsetWidth > crop.img.offsetWidth ? crop.img.offsetWidth / 2 - crop.frame.offsetWidth / 2 : crop.img.meta.x
     crop.img.meta.y = crop.img.meta.sy < 0 ? -crop.img.offsetHeight / 2 + crop.frame.offsetHeight / 2 : crop.img.meta.sy + crop.frame.offsetHeight > crop.img.offsetHeight ? crop.img.offsetHeight / 2 - crop.frame.offsetHeight / 2 : crop.img.meta.y
