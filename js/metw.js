@@ -1,4 +1,4 @@
-﻿class Session {
+class Session {
     constructor(SID) {
         this.SID = SID
         this.user = { id: 0 }
@@ -100,7 +100,7 @@
 
     }
     async get(param, selector) {
-        var user = this.indexed.users.find(typeof selector == 'number' || param != 'user' ? data => data.id == selector : user => user.name == selector)
+        var user = this.indexed[param + 's'].find(typeof selector == 'number' || param != 'user' ? data => data.id == selector : user => user.name == selector)
         return user ? user :
             await (async () => {
                 var [data, ok] = await this.request({ path: `/${param}s/${typeof selector == 'number' && param == 'user' ? ':' : ''}${selector}?id=${this.user.id}` })
