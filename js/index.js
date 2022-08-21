@@ -1,10 +1,10 @@
 ﻿const d = document, w = window
-var url = { backend: 'http://192.168.1.200/api', cdn: 'https://s3.amazonaws.com/cdn.metw.cc', ws: 'ws://192.168.1.200/api/ws', subdomain: w.location.host.split('.')[0] }
+var url = { backend: 'http://192.168.1.200/api', cdn: 'https://s3.amazonaws.com/cdn.metw.cc/utb', ws: 'ws://192.168.1.200/api/ws', subdomain: w.location.host.split('.')[0] }
 var pathname, search
 var p, page, indexedPages = {}
 var session, SID
 
-if (url.subdomain == 'ptb') url = { ...url, backend: 'https://api.metw.cc/ptb', cdn: 'https://cdn.metw.cc', ws: 'wss://api.metw.cc/ptb/ws' }
+if (url.subdomain == 'ptb') url = { ...url, backend: 'https://api.metw.cc/ptb', cdn: 'https://s3.amazonaws.com/cdn.metw.cc', ws: 'wss://api.metw.cc/ptb/ws' }
 for (let element of d.getElementsByClassName('subdomain')) element.innerHTML = url.subdomain + '.'
 
 const AsyncFunction = (async function () { }).constructor;
