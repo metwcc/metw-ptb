@@ -1,5 +1,5 @@
 ﻿const d = document, w = window
-var url = { backend: 'http://192.168.1.200/api', cdn: 's3.amazonaws.com/cdn.metw.cc', ws: 'ws://192.168.1.200/api/ws', subdomain: w.location.host.split('.')[0] }
+var url = { backend: 'http://192.168.1.200/api', cdn: 'https://s3.amazonaws.com/cdn.metw.cc', ws: 'ws://192.168.1.200/api/ws', subdomain: w.location.host.split('.')[0] }
 var pathname, search
 var p, page, indexedPages = {}
 var session, SID
