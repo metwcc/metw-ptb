@@ -195,7 +195,15 @@ class Post {
         if (done) this.liked = like, this.likeCount += 1 * (like ? 1 : -1); return done
     }
     async comment(content) {
-        return (await this._session.request({ path: `/comments?type=1&parent_id=${this.id}`, json: { content: content } }))[0]
+        var comment = new Comment(
+            {
+                id: (await this._session.request({ path: `/comments?type=1&parent_id=${this.id}`, json: { content: content } }))[0],
+                user_id: this._session.user.id, user: this._session.user, parent_id: this.id, type: 1,
+                content: content
+            }, this._session)
+        this.commentCount++
+        this._session.indexed.comments.push(comment); this.comments.unshift(comment)
+        return comment
     }
 }
 
